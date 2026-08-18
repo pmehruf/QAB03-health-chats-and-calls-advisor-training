@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QAB03 · Health Chats &amp; Calls — Advisor Training</title>
+<style>
+:root{
+  --bg:#EEF1F0;
+  --surface:#FFFFFF;
+  --surface-2:#F5F7F6;
+  --ink:#16212B;
+  --ink-soft:#4A5A68;
+  --ink-faint:#8494A0;
+  --line:#DCE3E1;
+  --line-strong:#C3CDCA;
+  --r1:#B3261E;
+  --r1-bg:#FBEAE9;
+  --r2:#D6493C;
+  --r2-bg:#FCEEEC;
+  --r3:#C7861A;
+  --r3-bg:#FBF1DE;
+  --r4:#5C8F4A;
+  --r4-bg:#EBF3E7;
+  --r5:#1E7A4C;
+  --r5-bg:#E4F3EB;
+  --sugg:#5B5FBF;
+  --sugg-bg:#ECEDF9;
+  --persona:#7A4FB0;
+  --persona-bg:#F2E9FA;
+  --shadow: 0 1px 2px rgba(22,33,43,.06), 0 4px 16px rgba(22,33,43,.06);
+  --radius: 10px;
+  --sidebar-w: 250px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+::selection{background:#CFE0DC;}
+a{color:inherit;}
+
+/* ---------- Severity rail (signature element) ---------- */
+.rail{
+  display:flex; height:6px; width:100%; border-radius:4px; overflow:hidden;
+}
+.rail span{flex:1;}
+.rail .s1{background:var(--r1);} .rail .s2{background:var(--r2);}
+.rail .s3{background:var(--r3);} .rail .s4{background:var(--r4);}
+.rail .s5{background:var(--r5);}
+
+/* ---------- Layout ---------- */
+.app{display:flex; min-height:100vh;}
+.sidebar{
+  width:var(--sidebar-w); flex-shrink:0; background:var(--ink); color:#E7ECEF;
+  position:fixed; top:0; left:0; bottom:0; overflow-y:auto; z-index:40;
+  display:flex; flex-direction:column;
+  transition:transform .25s ease;
+}
+.sidebar-head{padding:22px 20px 14px; border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-head .tag{
+  font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#9FB3C8; font-weight:600;
+}
+.sidebar-head h1{font-size:16px; margin:6px 0 2px; font-weight:700; letter-spacing:-.01em;}
+.sidebar-head .sub{font-size:12px; color:#8FA0AE;}
+.sidebar nav{padding:10px 10px 6px; flex:1;}
+.navlink{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:10px 12px; border-radius:8px; background:none; border:none; color:#C9D3D9;
+  font-size:13.5px; font-weight:500; cursor:pointer; margin-bottom:2px;
+  font-family:inherit;
+}
+.navlink .num{
+  font-size:10.5px; width:18px; height:18px; border-radius:5px; background:rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700;
+}
+.navlink:hover{background:rgba(255,255,255,.06); color:#fff;}
+.navlink.active{background:#28394A; color:#fff;}
+.navlink.active .num{background:#4C7CE0;}
+.sidebar-foot{padding:14px 20px 20px; border-top:1px solid rgba(255,255,255,.08);}
+.progress-label{font-size:11px; color:#8FA0AE; margin-bottom:6px; display:flex; justify-content:space-between;}
+.progress-track{height:5px; background:rgba(255,255,255,.1); border-radius:4px; overflow:hidden;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--r3),var(--r5)); width:0%; transition:width .4s ease;}
+
+.menu-toggle{
+  display:none; position:fixed; top:14px; left:14px; z-index:60; background:var(--ink); color:#fff;
+  border:none; border-radius:8px; width:38px; height:38px; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); cursor:pointer;
+}
+
+.main{margin-left:var(--sidebar-w); flex:1; min-width:0; padding:34px 40px 80px; max-width:1180px;}
+.view{display:none;}
+.view.active{display:block; animation:fadein .35s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin-bottom:8px;}
+.view h2{font-size:26px; margin:0 0 6px; letter-spacing:-.015em;}
+.view > .intro{color:var(--ink-soft); font-size:14.5px; max-width:760px; margin-bottom:26px;}
+
+.callout{
+  background:var(--surface-2); border:1px solid var(--line); border-left:4px solid #4C7CE0;
+  border-radius:8px; padding:14px 16px; font-size:13.5px; color:var(--ink-soft); margin:0 0 24px;
+}
+.callout b{color:var(--ink);}
+.callout ul{margin:6px 0 0; padding-left:18px;}
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.grid{display:grid; gap:14px;}
+.grid-5{grid-template-columns:repeat(5,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+@media(max-width:980px){.grid-5{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.grid-5,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+.rating-card{padding:16px; cursor:pointer; border-top:4px solid var(--c);}
+.rating-card .num{font-size:28px; font-weight:800; color:var(--c);}
+.rating-card .lbl{font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink);}
+.rating-card .desc{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+.rating-card .count{font-size:11px; color:var(--ink-faint); margin-top:10px;}
+
+/* badges */
+.badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+  padding:3px 9px; border-radius:20px; white-space:nowrap; letter-spacing:.02em;
+}
+.badge-1{background:var(--r1-bg); color:var(--r1);}
+.badge-2{background:var(--r2-bg); color:var(--r2);}
+.badge-3{background:var(--r3-bg); color:var(--r3);}
+.badge-4{background:var(--r4-bg); color:var(--r4);}
+.badge-5{background:var(--r5-bg); color:var(--r5);}
+.badge-sugg{background:var(--sugg-bg); color:var(--sugg);}
+.badge-persona{background:var(--persona-bg); color:var(--persona);}
+.badge-outline{background:none; border:1px solid var(--line-strong); color:var(--ink-soft); font-weight:600;}
+
+/* explorer */
+.toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; align-items:center;}
+.search-box{
+  flex:1; min-width:220px; display:flex; align-items:center; gap:8px; background:var(--surface);
+  border:1px solid var(--line-strong); border-radius:9px; padding:9px 14px;
+}
+.search-box input{border:none; outline:none; font-size:14px; width:100%; font-family:inherit; background:none; color:var(--ink);}
+.chip-row{display:flex; flex-wrap:wrap; gap:6px;}
+.chip{
+  padding:6px 12px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface);
+  font-size:12px; font-weight:600; cursor:pointer; color:var(--ink-soft);
+}
+.chip.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+.result-count{font-size:12px; color:var(--ink-faint); margin:2px 0 14px;}
+
+.rule-card{padding:16px 18px; margin-bottom:12px; position:relative; overflow:hidden;}
+.rule-card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c);}
+.rule-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;}
+.rule-code{font-size:11.5px; font-weight:800; color:var(--ink-faint); letter-spacing:.03em;}
+.rule-title{font-size:15px; font-weight:700; margin:2px 0 6px;}
+.rule-rule{font-size:13.5px; color:var(--ink-soft); line-height:1.55;}
+.rule-tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+.rule-more{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);}
+.rule-more.hidden{display:none;}
+.note-item{font-size:12.5px; color:var(--ink-soft); background:var(--surface-2); border-radius:6px; padding:8px 10px; margin-bottom:6px;}
+.note-item b{color:var(--ink);}
+.annex-item{font-size:13px; margin-bottom:8px; padding-left:20px; position:relative;}
+.annex-item .letter{position:absolute; left:0; top:0; font-weight:800; color:var(--ink-faint); font-size:12px;}
+.expand-btn{
+  background:none; border:1px solid var(--line-strong); border-radius:7px; padding:6px 12px; font-size:12px;
+  font-weight:700; color:var(--ink-soft); cursor:pointer; margin-top:10px; font-family:inherit;
+}
+.expand-btn:hover{background:var(--surface-2);}
+
+/* modules */
+.module-card{margin-bottom:14px; overflow:hidden;}
+.module-header{
+  padding:16px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:12px;
+}
+.module-header h3{margin:0; font-size:15.5px;}
+.module-header .m-sub{font-size:12px; color:var(--ink-faint); margin-top:3px; font-weight:500;}
+.module-header .chev{transition:transform .2s ease; color:var(--ink-faint); flex-shrink:0;}
+.module-header.open .chev{transform:rotate(180deg);}
+.module-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.module-body.open{max-height:4000px;}
+.module-body-inner{padding:0 20px 20px; border-top:1px solid var(--line);}
+.topic-block{padding:16px 0; border-bottom:1px solid var(--line);}
+.topic-block:last-child{border-bottom:none;}
+.topic-block h4{margin:0 0 4px; font-size:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.topic-block .sop-requires{font-size:13px; color:var(--ink-soft); margin-bottom:8px;}
+.topic-block .field-label{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:700; margin:10px 0 4px;}
+.example-box{
+  background:var(--surface-2); border-radius:8px; padding:10px 12px; font-size:12.5px; color:var(--ink-soft); margin-top:6px;
+}
+
+/* boundaries */
+.boundary-card{padding:18px 20px; margin-bottom:14px;}
+.boundary-title{font-size:14.5px; font-weight:700; margin-bottom:10px;}
+.vs-row{display:flex; gap:14px; align-items:stretch; flex-wrap:wrap;}
+.vs-col{flex:1; min-width:220px; background:var(--surface-2); border-radius:8px; padding:12px 14px;}
+.vs-col .badge{margin-bottom:6px;}
+.vs-col p{margin:4px 0 0; font-size:13px; color:var(--ink-soft);}
+.vs-mid{display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:var(--ink-faint); text-transform:uppercase; padding:0 4px;}
+.boundary-source{font-size:11.5px; color:var(--ink-faint); margin-top:10px; font-weight:600;}
+
+/* scenarios */
+.scenario-card{padding:18px 20px; margin-bottom:16px;}
+.scenario-num{font-size:11px; font-weight:800; color:var(--sugg); text-transform:uppercase; letter-spacing:.06em;}
+.scenario-text{font-size:14.5px; margin:8px 0 14px; line-height:1.6;}
+.scenario-q{font-size:13px; font-weight:700; margin-bottom:6px;}
+.scenario-reveal{
+  background:var(--surface-2); border-radius:8px; padding:12px 14px; margin-top:8px; font-size:13px; color:var(--ink-soft); display:none;
+}
+.scenario-reveal.shown{display:block;}
+.reveal-btn{
+  background:var(--ink); color:#fff; border:none; border-radius:7px; padding:9px 16px; font-size:12.5px;
+  font-weight:700; cursor:pointer; font-family:inherit;
+}
+.reveal-btn:hover{opacity:.88;}
+
+/* common mistakes (from feedback log) */
+.stat-strip{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px;}
+.stat-box{flex:1; min-width:130px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+.stat-box .stat-num{font-size:24px; font-weight:800; color:var(--ink);}
+.stat-box .stat-lbl{font-size:11.5px; color:var(--ink-faint); font-weight:600; margin-top:2px;}
+.mistake-card{padding:18px 20px; margin-bottom:16px;}
+.mistake-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:4px;}
+.mistake-title{font-size:15px; font-weight:700;}
+.mistake-count{font-size:11.5px; color:var(--sugg); font-weight:700; background:var(--sugg-bg); padding:3px 10px; border-radius:20px; white-space:nowrap;}
+.mistake-codes{display:flex; gap:5px; flex-wrap:wrap; margin:8px 0 14px;}
+.code-pill{
+  font-size:10.5px; font-weight:800; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--line);
+  padding:2px 8px; border-radius:12px; cursor:pointer; font-family:inherit;
+}
+.code-pill:hover{background:var(--line);}
+.mistake-cols{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:760px){.mistake-cols{grid-template-columns:1fr;}}
+.mistake-col-head{font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+.mistake-col-head.wrong{color:var(--r1);}
+.mistake-col-head.ideal{color:var(--r5);}
+.mistake-list{margin:0; padding-left:18px; font-size:13px; color:var(--ink-soft); line-height:1.55;}
+.mistake-list li{margin-bottom:8px;}
+.source-note{font-size:11.5px; color:var(--ink-faint); margin-top:2px;}
+
+/* quiz */
+.quiz-shell{max-width:680px;}
+.quiz-progress{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:12.5px; color:var(--ink-faint); font-weight:600;}
+.quiz-dots{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;}
+.quiz-dot{
+  width:26px; height:26px; border-radius:7px; border:1.5px solid var(--line-strong); background:var(--surface);
+  font-size:10.5px; font-weight:800; color:var(--ink-faint); cursor:pointer; font-family:inherit;
+  display:flex; align-items:center; justify-content:center;
+}
+.quiz-dot.locked{cursor:not-allowed; opacity:.45;}
+.quiz-dot.current{border-color:var(--ink); border-width:2px; color:var(--ink);}
+.quiz-dot.correct{background:var(--r5-bg); border-color:var(--r5); color:var(--r5);}
+.quiz-dot.incorrect{background:var(--r1-bg); border-color:var(--r1); color:var(--r1);}
+.quiz-card{padding:24px 26px;}
+.quiz-q{font-size:16px; font-weight:700; margin-bottom:18px; line-height:1.5;}
+.quiz-opt{
+  display:block; width:100%; text-align:left; padding:12px 14px; border-radius:9px; border:1.5px solid var(--line-strong);
+  background:var(--surface); font-size:13.5px; cursor:pointer; margin-bottom:9px; font-family:inherit; color:var(--ink);
+  transition:border-color .15s, background .15s;
+}
+.quiz-opt:hover{border-color:var(--ink-faint);}
+.quiz-opt.correct{border-color:var(--r5); background:var(--r5-bg); font-weight:700;}
+.quiz-opt.incorrect{border-color:var(--r1); background:var(--r1-bg); font-weight:700;}
+.quiz-opt.disabled{cursor:default;}
+.quiz-explain{
+  margin-top:14px; padding:12px 14px; background:var(--surface-2); border-radius:8px; font-size:13px; color:var(--ink-soft); display:none;
+}
+.quiz-explain.shown{display:block;}
+.quiz-nav{display:flex; justify-content:space-between; gap:10px; margin-top:18px;}
+.btn{
+  background:var(--ink); color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:13px;
+  font-weight:700; cursor:pointer; font-family:inherit;
+}
+.btn.secondary{background:none; border:1.5px solid var(--line-strong); color:var(--ink-soft);}
+.btn:disabled{opacity:.4; cursor:default;}
+.quiz-result{padding:34px 30px; text-align:center;}
+.quiz-result .score{font-size:44px; font-weight:800; margin:10px 0;}
+.quiz-result .score-lbl{font-size:13px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; font-weight:700;}
+.quiz-result .result-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px;}
+.review-banner{
+  display:flex; justify-content:space-between; align-items:center; background:var(--sugg-bg); color:var(--sugg);
+  font-size:12.5px; font-weight:700; padding:9px 14px; border-radius:8px; margin-bottom:14px;
+}
+
+/* reference table */
+.ref-table{width:100%; border-collapse:collapse; font-size:12.8px;}
+.ref-table th{
+  text-align:left; padding:9px 12px; background:var(--surface-2); font-size:10.8px; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--ink-faint); border-bottom:1px solid var(--line); position:sticky; top:0;
+}
+.ref-table td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-soft);}
+.ref-table tr:hover td{background:var(--surface-2);}
+.ref-table .code-cell{font-weight:800; color:var(--ink); white-space:nowrap;}
+.ref-scroll{max-height:640px; overflow-y:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface);}
+
+.footer-note{font-size:11.5px; color:var(--ink-faint); margin-top:40px; padding-top:16px; border-top:1px solid var(--line);}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0; padding:70px 18px 60px;}
+  .menu-toggle{display:flex;}
+  .grid-5{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="tag">Quality Bliss · SOP QAB03</div>
+      <h1>Health Chats &amp; Calls</h1>
+      <div class="sub">Advisor training resource</div>
+    </div>
+    <nav id="navList"></nav>
+    <div class="sidebar-foot">
+      <div class="progress-label"><span>Your progress</span><span id="progressPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="viewRoot"></div>
+  </main>
+</div>
+
+<script>
+const RULES = [
+{code:"1.1", title:"Policy Recommendation", rating:1, type:"rating", medium:"both", lo:null, module:"profiling",
+ rule:"The recommended plan to the customer was incorrect / recommendation was made without understanding the profile completely.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Not asking all the mandatory questions to understand the customer's profile — whom, age, past hospitalisations, current and previous medications, and medical diagnoses. This applies even if the customer has disclosed certain conditions prior to medical profiling."},
+  {letter:"B", text:"Recommending plans that do not align with our recommendations or the disease-wise tool or as per age condition (like age restriction in OS+ etc).", notes:["Example: if the tool gives an option of one comprehensive plan and one restrictive plan, giving only the comprehensive plan with the rejection disclaimer would be rated 1. Advisors should talk about the restrictive plan or just let the lead know there would be another option with high probability of issuance."]},
+  {letter:"C", text:"Not reconfirming whom, age, medical profile, and current address of the proposer when the customer comes back after 90 days from the last day of discussion.", notes:["The advisor who initiated the conversation is responsible for confirming whom, age, medical profile information and can utilise the health questionnaire as needed. However, if the customer fails to disclose certain conditions that were previously mentioned, the advisor should reconfirm those details as well. Additionally, the advisor should verify the current address pincode of the proposer before sharing the premiums.","Ideal procedure would be doing profiling when the lead comes back after 30 days from the last conversation. It would be highlighted if not followed."]},
+  {letter:"D", text:"Not asking all the mandatory questions mentioned in the disease-wise tool.", notes:["If a missed mandatory question doesn't affect the recommendation, it won't be marked."]},
+  {letter:"E", text:"Not requesting the reports and getting the query answered from the medical queries space using chat ID if the customer is unaware of the type of a particular condition and unable to describe it, and thus the advisor is unsure about the recommendation.", notes:["If a customer provides a report for a condition that can be clearly understood by the advisor, the advisor can decide to proceed with the recommendation for that customer. This should only be done when there is no confusion regarding the medical condition mentioned in the report."]},
+  {letter:"F", text:"Not asking for the timeline of surgery when the customer discloses a surgery (needs to be asked even if not specified in the disease-wise tool).", notes:["If a customer mentions something vague like \"some time ago\" or \"a while back,\" the advisor should inquire about an approximate timeline to understand when the surgery occurred."]},
+  {letter:"G", text:"Not giving the correct individual/floater combinations (whichever is possible with the insurer).", notes:["Not giving floater combinations when it is possible for the profile would be rated 1.","Not talking about the exit ages when we recommend floater options for the ages 23 and above would be rated 3."]},
+  {letter:"H", text:"Not asking for the exact ages of the customers or not verifying the date of birth (DOB) when the customer provides an approximate age or when age is borderline (Ex: 55 in case Energy is the reco, 91 days, etc.).", notes:["The advisor who is doing profiling is responsible for the same."]},
+  {letter:"I", text:"Failing to verify with the customer when different ages are provided in various places, such as the questionnaire, chat, or call."},
+  {letter:"J", text:"Not confirming the residential status of the insured and the proposer for International customers.", notes:["It is mandatory to check if they are holding an Indian Passport (applicable for all NRI insured members and proposer) before proceeding further. If the customer (proposer/insured) doesn't have an Indian Passport (cases where NRIs gave up Indian Citizenship) or the customer is an OCI holder, then we cannot assist further.","The advisor who does profiling is responsible for giving a disclaimer, asking about the Indian passport, proposer details, pincode of the proposer confirmation, else it would be rated 1.","Not confirming the residential status of the Indian customer before scheduling the payment call would be rated 3."]},
+  {letter:"K", text:"If the advisor asks all 5 PED questions in chat/call, these should be asked in a way that the core idea or intent is not changed. Else it will be rated 1.", notes:["The 5 PED profiling questions: (1) Have you ever been admitted to a hospital or had a surgery or stayed for observation, even for one night? (2) Have you been diagnosed by a doctor with any long-term or short-term illness or condition? Examples include thyroid issues, diabetes, or hypertension. (3) Apart from the conditions we've already discussed, are there any other medications going on right now, or anything you've taken regularly in the past? (4) Have you undergone investigative tests such as scans, X-rays, or blood tests that showed any findings — even if the doctor said 'nothing to worry'? (5) Is there anything else about your health — past or present — that an insurer should know? For example, genetic issues, congenital conditions, or birth defects.","Skipping the entire text/word in bold under each question will be rated 4.","Missing a question completely would still be rated 1."]},
+  {letter:"L", text:"Not providing recommendations as per playbook when the customer is adamant about maternity after giving the disclaimer would be rated 1. If the customer wants one more option to consider for maternity cover or if the customer wants maternity coverage specifically in HDFC, then we should pitch OS+/OS with Parenthood Add-on.", notes:["If the customer has a requirement of having higher maternity coverage with less waiting period, or if the customer feels Aspire Titanium+ maternity coverage is too low, advisors are expected to pitch the Fast Forward add-on, else it would be rated 1. Giving any wrong information or omission of clauses related to the Fast Forward add-on would also be rated 1."]},
+  {letter:"M", text:"If the customer still chooses to opt for the Care Ultimate plan even after giving the narrative/disclaimer, the advisor should proceed with the plan discussion. Not discussing the plan or stating that it is unavailable will be rated 1."}
+ ]},
+
+{code:"1.2", title:"Premiums", rating:1, type:"rating", medium:"both", lo:null, module:"premiums",
+ rule:"Premiums shared with customers are incorrect.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"The current address pincode of the proposer needs to be considered for calculating premiums.", notes:["For cases with multiple profiles in one chat / cases where the lead cannot be the proposer for the insured, the advisor needs to check who will be the proposer for each of these profiles and get the pincode accordingly, and not just use one pincode across the profiles without confirmation. Else, it would be rated 1. The advisor who calculates the premiums would be responsible for the same."]},
+  {letter:"B", text:"Sharing premiums without including mandatory riders, requested riders, or those riders promised by the advisor."},
+  {letter:"C", text:"Sharing wrong premiums as a result of entering the wrong inception date in Care porting plans."},
+  {letter:"D", text:"Advisors can use either the OS porting premium tool link or 1up portal link to generate premiums. If the premiums were generated through our Falcon tool — which gives fresh plan premiums considering FCED discount for fresh cases instead of a porting scenario — it would be considered an error.", notes:["The link gives base premiums without any add-ons, so not specifying that these are the approx premiums without add-ons would be rated 4."]}
+ ]},
+
+{code:"1.3", title:"Heads-up", rating:1, type:"rating", medium:"both", lo:null, module:"underwriting",
+ rule:"Advisors must inform customers about the outright / high chances of rejection.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Not informing the customer about the chances of permanent exclusion for a customer's pre-existing disease (PED) in policies where applicable."},
+  {letter:"B", text:"Not giving a heads up when the date of renewal is 7 days or less, and porting was recommended."},
+  {letter:"C", text:"Not informing the customer that issuance of the policy depends on underwriting in case of PED.", notes:["If the customer's disease is not covered in the Disease-wise Tool and leads to even the slightest confusion, the advisor is expected to check with the medical team and give the appropriate heads up."]},
+  {letter:"D", text:"Not informing customers who have recently been hospitalised, whether for surgical or non-surgical reasons, not to apply for a policy until one month after their discharge date, or according to the duration specified in the Disease-wise Tool (DWT) for their condition.", notes:["If the customer still wishes to receive a recommendation or claims to have fully recovered, the advisor may proceed with providing the recommendations."]},
+  {letter:"E", text:"Not sending H/Unassisted payments in case the customer wants to complete the payment by himself."},
+  {letter:"F", text:"If the customer is adamant to not disclose his PED even after giving the non-disclosure disclaimer (claim rejection and also possible policy termination), we have to inform the lead that we will help with the application, but if any claim issue related to the non-disclosed PED arises, or if the claim gets denied due to the non-disclosure, we will not be able to help with that particular claim on account of non-disclosure."}
+ ]},
+
+{code:"1.4", title:"Waiting Periods", rating:1, type:"rating", medium:"both", lo:null, module:"waiting-exclusions",
+ rule:"Not discussing relevant waiting periods or giving wrong information about the same.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Not informing the 30-day initial waiting period for all the recommended plans."},
+  {letter:"B", text:"Not informing the specific illness waiting periods mentioned by insurers, for all the recommended plans."},
+  {letter:"C", text:"Not informing the PED waiting periods in case of PED for all the recommended plans that we sell."},
+  {letter:"D", text:"Not discussing maternity waiting periods when discussing maternity plans.", notes:["This information can be shared in either snip/QR/own message/flow format."]},
+  {letter:"E", text:"Mentioning the incorrect duration of any waiting period of the recommended plan."},
+  {letter:"F", text:"Not recommending riders that reduce the waiting period when there is a PED in all the recommended plans that we sell.", notes:["Pitching the PED modification rider to 1 year when the PED falls under the specific illness list would be rated 1.","PED-rider-related details should be given as per the playbook."]},
+  {letter:"G", text:"Suggesting riders to reduce waiting periods, even though the Disease-Wise Tool (DWT) mentions no waiting period for a certain condition, will be rated 1."}
+ ]},
+
+{code:"1.5", title:"Loading Charges", rating:1, type:"rating", medium:"both", lo:null, module:"premiums",
+ rule:"Failure to discuss loading charges applicable in case of a pre-existing disease (PED) or abnormal BMI.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Failure to disclose loading charges for pre-existing diseases / abnormal BMI in all recommended plans that we sell, as per the Disease-Wise Tool.", notes:["For BMI, advisors can use the BMI calculator to get loading applicability details.","When we recommend the Chronic Care rider in Aditya Birla for more than one PED in the specified list, the waiver of the loading charge would depend on the underwriting. Not informing the same would be rated 1."]}
+ ]},
+
+{code:"1.6", title:"Exclusion", rating:1, type:"rating", medium:"both", lo:null, module:"waiting-exclusions",
+ rule:"Mistakes or omissions of exclusions.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Not sharing the policy wording (with page number) links/snips of the specific illness and permanent exclusion of the recommended plans.", notes:["Give any two examples and ask the lead to check the policy wording for exact exclusion details and the full list after the call/chat. For scenarios where exclusions should be addressed but aren't, that would be highlighted. Wrong information provided to the customer while explaining any exclusions would be rated 1."]}
+ ]},
+
+{code:"1.7", title:"Porting", rating:1, type:"rating", medium:"both", lo:null, module:"porting",
+ rule:"Wrong/incomplete information about porting.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Not following the porting flow when the customer with an existing plan is looking to buy a new plan.", notes:["If the customer, in the middle of a conversation, discloses that they have an existing plan, the advisor should switch to the porting pitch."]},
+  {letter:"B", text:"Advisors should use the Porting Flow Webapp to check the recommendations if the customer is looking to port/migrate, or if we are suggesting porting/migration. If the recommendation/narrative is not as per the Porting Flow Webapp, then it would be rated 1.", notes:["If the customer is adamant that he is not happy with the current insurer/current plan where we can't help them with porting/migration, the advisor can proceed as per the customer's interest and assist them with porting/migrating recommendations as applicable, and redirect them to the insurer after doing medical profiling. Else it would be rated 1.","Not following FAQ-1 mentioned in the Porting Flow Webapp when the lead asked about it would be rated 3."]},
+  {letter:"C", text:"Recommending plans for porting in any case without understanding the insured's medical profile."},
+  {letter:"D", text:"Not discussing the implications of porting on waiting periods and bonus when plans for porting were recommended."},
+  {letter:"E", text:"Not informing about the porting window when the porting window is open."},
+  {letter:"F", text:"Not considering the customer's declaration of medical conditions in chat, questionnaires, calls, and details mentioned in the previous policy document before providing a recommendation in case of porting."},
+  {letter:"G", text:"Failure to inform customers about the fresh waiting periods applicable when increasing cover amounts during porting."},
+  {letter:"H", text:"In case of porting, not mentioning that a new PED waiting period would apply for a condition diagnosed during the current policy period, if not disclosed to the current insurer."},
+  {letter:"I", text:"Not adhering to the porting guidelines, if there are any, in the plans recommended.", notes:["Example: porting guidelines in Secure, along with the fresh waiting period on the Secure benefit and unlimited restoration add-on."]},
+  {letter:"J", text:"Change of proposer decision lies with the insurer. Not informing the same would be rated 3 when the customer asked for it."}
+ ]},
+
+{code:"1.8", title:"Migration", rating:1, type:"rating", medium:"both", lo:null, module:"porting",
+ rule:"Wrong/misinformation about Migration.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Recommending migration without a disclaimer of issuance and not informing the customer to reach out to the insurer directly."},
+  {letter:"B", text:"Giving a timeline to migrate which is a general window of 45–60 days is fine, but a commitment to other timelines should not be made. Else, it would be rated 1."},
+  {letter:"C", text:"Giving any commitments regarding the NCB/bonus transfer or the waiting period."}
+ ]},
+
+{code:"1.9", title:"Policy Features", rating:1, type:"rating", medium:"both", lo:null, module:"features",
+ rule:"Missed a query / mistakes, or omissions of details mentioned in the playbook while explaining co-payment, room category details, disease-wise sub-limits, OPD, health check-ups, and maternity details to customers, and available cover amounts when the customer asked for the same.",
+ notes:[
+  "Missed a query / mistakes, or omissions of details mentioned in the annexure while explaining co-payment, room category details, disease-wise sub-limits in comprehensive plans would be rated 3 when the customer asked for it.",
+  "Details mentioned under other points in the playbook: NRI discount if missed would be rated 3; any other feature-related points will be marked as per the SOP; health returns and other discounts will be rated 3.",
+  "Misinformation about the available cover amounts in porting cases would be Rated 1, and in normal cases would be Rated 3.",
+  "All the details mentioned in this section should be discussed as per the profile."
+ ],
+ annexure:[
+  {letter:"A", text:"Failure to address a query on copayment, disease-wise sublimits, room rent restrictions, or failure to explain the definition and limits (if any) as per the playbook, in the recommended plans, when the customer inquires about copayment, disease-wise sublimits, and room rent restrictions.", notes:["If the limits are shared through the comparison snippet, then this will not be marked."]},
+  {letter:"B", text:"Failure to address a query on the annual health check-up, or failure to explain the following when the customer is interested, when advisors pitch this add-on, or when the add-on is mandatory: if the annual health check-up is available as an add-on or a built-in feature; limits of this benefit for the cover amounts recommended/asked for; whether it is available on a reimbursement/cashless basis; and from when the customer can use this benefit.", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked."]},
+  {letter:"C", text:"Failure to address a query on the OPD benefit, or failure to explain the following when the customer is interested, when advisors pitch this add-on, or when the add-on is mandatory: if OPD is available as an add-on or a built-in feature; limits of this benefit for the cover amounts recommended/asked for; if OPD is available on a reimbursement/cashless basis; from when the customer can use this benefit; and coverage.", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked.","If the customer wants OPD coverage, advisors can pitch the Care OPD add-ons without the OPD disclaimer, and Optima Well-being with the narrative as per the playbook, when the recommended plans are from HDFC and Care that offer OPD benefits, since these add-ons offer good value. Else it would be rated 3.","If the customer isn't satisfied with Optima Well-being and Care plans' OPD add-ons and asks for OPD options in other plans, then the advisor should give the general OPD disclaimer. Else it would be rated 3.","For all cases where the recommended plans are not OS variants or Care plans, the advisor must give the general OPD disclaimer — otherwise this will be rated 3.","Pitching the Optima Well Being rider without the customer asking for the same would be rated 3."]},
+  {letter:"D", text:"Failure to address a query on the maternity benefit, or failure to explain the following when the customer inquires, when advisors pitch this add-on, or when the add-on is mandatory: if maternity is available as an add-on or a built-in feature; limits of this benefit for the cover amounts recommended/asked for; waiting periods to use this benefit; and coverage as per the customer's query.", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked.","Failing to provide the maternity disclaimer when customers inquire about this benefit will be rated 3."]}
+ ]},
+
+{code:"1.10", title:"Snip and brochures", rating:1, type:"rating", medium:"both", lo:null, module:"docs",
+ rule:"Not sending the available comparison snips of the recommended policies, maternity snips whenever applicable, and not sending the Ditto website links of the recommended plans for which snips are unavailable, to access brochures/policy wordings.",
+ notes:[], annexure:[]},
+
+{code:"1.11", title:"Customer Experience", rating:1, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Outright rude behaviour with the lead / mis-selling to the lead.",
+ notes:[], annexure:[]},
+
+{code:"1.12", title:"Over Promising", rating:1, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Over-promising about the issuance of the plan / timeline for the issuance.",
+ notes:[], annexure:[]},
+
+{code:"2.1", title:"Policy Features", rating:2, type:"rating", medium:"both", lo:null, module:"features",
+ rule:"Missed a query / mistakes / omissions of details mentioned in the annexure while explaining Daycare, STU to customers, when the customer asked for it.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Failure to address a query on Daycare, or failure to explain the following when the customer inquires about Daycare: coverage; duration of hospitalisation required to use this benefit; limits if there are any in the recommended plans; and that anaesthesia should be used in the treatment to cover this benefit, except for Dialysis and Chemotherapy.", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked."]},
+  {letter:"B", text:"Failure to address a query on STU, or failure to explain the following when the customer inquires about STUs: the disclaimer (deductible amount, same-company condition) should be given, else it would be rated 3; and the timeline for opting the base plan and STU."}
+ ]},
+
+{code:"3.1", title:"Review", rating:3, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Not discussing the following features of the customer's existing plan when the customer asks for a review of their existing plan / is unsure of their existing plan, or if the customer asks for any plan's review.",
+ notes:[
+  "No-PED case: Room Rent, Disease-wise limits, Co-pay, Bonus, Restoration.",
+  "PED case: Room Rent, Disease-wise limits, Co-pay, Bonus, Restoration, and Waiting periods.",
+  "Not giving the company disclaimer whenever necessary would be rated 3."
+ ], annexure:[]},
+
+{code:"3.2", title:"Policy Features", rating:3, type:"rating", medium:"both", lo:null, module:"features",
+ rule:"Missed a query / mistakes / omissions of details mentioned in the annexure while explaining Cumulative Bonus, NCB, Restoration, Aggregate deductibles and Cashless anywhere when the customer asked for these; and missed a query / mistakes / omissions of details mentioned in the playbook while explaining CSR, ICR, age brackets, modern treatments, consumables, organ donor, add-ons, ambulance, in-built special features, or any other product feature other than the ones mentioned in Rating 1 and 2, when the customer asked for these.",
+ notes:["If any details mentioned in the annexure are shared through the comparison snippet, they will not be marked."],
+ annexure:[
+  {letter:"A", text:"Failure to address a query on the Cumulative Bonus/NCB, or failure to explain the following when the customer inquires: definition; claw-back feature, if applicable in the policy recommended; that the bonus is irrespective of the claim made, if applicable; the percentage of increase every year and the limit of extension; any other limits, if applicable; and add-ons related to the bonus/NCB that Ditto generally recommends (Ex: Cumulative Bonus Super, etc.).", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked."]},
+  {letter:"B", text:"Failure to address a query on Restoration, or failure to explain the following when the customer inquires: definition; the percentage of restoration in the plans recommended; restoration on partial/complete exhaustion, whatever is applicable; frequency of restoration (one-time/unlimited) as applicable; clarity on the application of restoration on any illness/different illness as per the plans recommended; and any limits, if applicable (Ex: the single claim cannot exceed the base cover).", notes:["If any of the details above are shared through the comparison snippet, then this will not be marked.","Any wrong information or omission of information mentioned above in comprehensive plans like HDFC Optima Secure, Care Supreme, etc. would be Rated 3, and in restrictive plans like Care Heart, Care Freedom, etc. would be Rated 2."]},
+  {letter:"C", text:"Failure to address a query on the Aggregate deductible, or failure to explain the following when the customer is interested in the aggregate deductible in the base plan: a disclaimer should be given when the customer is interested; the available aggregate deductible cover amounts as per the cover the customer preferred or the advisor pitched, if the customer wants to proceed even after the disclaimer; and the waiver of aggregate deductible clauses, if applicable, in the plans recommended."},
+  {letter:"D", text:"Failure to address a query on Cashless anywhere, or failure to explain the same when the customer inquires about it.", notes:["If there are any concerns about the network hospitals list being shared, network hospital links will be shared, and if there are any negative responses from customers after sharing the network hospital links, advisors should explain the cashless-anywhere options available. Else, it would be rated 3."]}
+ ]},
+
+{code:"3.3", title:"Loading Charges", rating:3, type:"rating", medium:"both", lo:null, module:"premiums",
+ rule:"Missing to specify the range of loading charges.",
+ notes:["In diabetes insulin cases, if the DWT tool recommends Energy, it is fine even if the advisor is giving the LC range or no range at all."],
+ annexure:[]},
+
+{code:"3.4", title:"Riders", rating:3, type:"rating", medium:"both", lo:null, module:"riders",
+ rule:"Not adding the recommended riders during the premium calculation / not explaining the recommended riders and mandatory riders, and the riders enquired by the customer (apart from the riders that fall under Rating 1), as per the playbook.",
+ notes:["CBS and CBB riders should be recommended when either of the riders is mandatory/not mandatory for the customer's pincode. Else, it would be rated 3."],
+ annexure:[]},
+
+{code:"3.5", title:"Reasoning", rating:3, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Recommending the best plan out of the recommended ones without giving a reason for it being the best, when the customer asked for it.",
+ notes:[], annexure:[]},
+
+{code:"3.6", title:"Miscellaneous", rating:3, type:"rating", medium:"both", lo:null, module:"misc36",
+ rule:"General mistakes/omissions usually observed.",
+ notes:["This is not an exhaustive list; there are a few other areas as well where, if mistakes/omissions are observed, the chat/call rating can be lowered accordingly."],
+ annexure:[
+  {letter:"A", text:"If there is any recommendation in the disease-wise tool that we do not sell, advisors should share the recommendation and explain why we do not sell that particular plan.", notes:["Example: Manipal Cigna plans for certain epilepsy cases."]},
+  {letter:"B", text:"Not informing the customer that a rider is mandatory after sharing the premiums, which included mandatory riders too."},
+  {letter:"C", text:"Not mentioning the word \"high\" but just saying chances of rejection, when a condition in the disease-wise tool says outright rejection or high chances of rejection.", notes:["Example: in Diabetes Type 1 and taking insulin shots, DWT says Energy with HIGH chances of rejection. Advisors need to similarly check for PEDs in the DWT for this note."]},
+  {letter:"D", text:"Not informing the customer that the premiums would change with age / age bands whenever the premiums are shared. The advisor who shared the premiums is responsible for the same.", notes:["If the customer asks for an estimated percentage increase in premium, we can share the following numbers — Secure: 2 to 4% till age 60, 8 to 10% above 60. Other plans: age bands — 15 to 30% when moving from one age band to another."]},
+  {letter:"E", text:"Not informing that policy issuance depends on underwriting if the customer mentions smoking 10 or more cigarettes per day, or describes themselves as a chain smoker. Similarly, if their BMI is abnormal, they should also be warned about underwriting.", notes:["We do not directly ask about smoking status or BMI. If a customer voluntarily shares this information or indicates abnormal weight, advisors should check the BMI and provide a heads-up accordingly."]},
+  {letter:"F", text:"Not giving the NRI disclaimer when the customer (proposer/insured) is an international client.", notes:["If the customer is adamant to go ahead with the purchase post giving the disclaimer, advisors can recommend HDFC and Care plans.","If the customer, being an NRI (proposer), is looking for the person who lives in India, advisors should nudge to have either the insured become the proposer, or any sibling or any person from India who can become the proposer. Not nudging the same would be rated 4."]},
+  {letter:"G", text:"Not informing the customer to attach the Renewal Notice of the current policy (if available) to get porting benefits on the bonus part for enhancing the sum insured in the new ported policy, along with the document list, when the customer is looking to enhance his cover amount.", notes:["When the lead is going with the same cover amount / lower cover amount as the existing plan, then a renewal notice is not required. Asking for a renewal notice and not proceeding with the payment in such cases would be rated 1, and not asking for a renewal notice in cases where the lead is going with a higher cover amount than the existing cover would be rated 1."]},
+  {letter:"H", text:"In general, giving wrong information about the ideal BMI range for our recommended plans in discussion."},
+  {letter:"I", text:"Not informing about the expected time of issuance in porting and non-porting cases, when the customer enquires about the same.", notes:["Advisors need not convey the exact date. FYI, the TAT for policy issuance is approximately 7–14 working days for non-porting cases, and approximately 3 weeks for porting cases.","Overpromising / giving a wrong timeline when the customer enquires about the timeline of issuance — according to the profile and along with the disclaimer if the advisor missed informing that if additional docs are asked or medical is triggered, then due to back and forth the timeline may get extended — for non-porting cases and for porting cases, this would be rated 4."]},
+  {letter:"J", text:"Not leaving the chat IDs in the notes for the evaluation of both chat IDs, when the conversation with the same lead happened in two different chats."},
+  {letter:"K", text:"For customers who have purchased a policy through us previously and want to explore porting/migration or ask about renewals, advisors should redirect them to the Renewal team.", notes:["Advisors can confirm with the customer if the plan was purchased through us, or check the payment history for the details of the purchase of the plan, or check the policy document copy."]},
+  {letter:"L", text:"Not informing about the fresh waiting periods and loading charges applicable when increasing cover amounts, or during porting in future, if the customer enquires about the same."},
+  {letter:"M", text:"Issuance Date is used to determine the timeline for the 30-day free-look period. Start Date is the basis for calculating the Coverage Start Date and Waiting Periods. Any mistakes made while explaining this, when the customer enquired about the same, would be rated 3.", notes:["The Start Date corresponds to the beginning date specified in the \"Period of Insurance\" section (which clearly outlines the start and end dates of the coverage). Example: if the Period of Insurance is stated as (12-05-2026 to 11-05-2027), then 12-05-2026 will be considered the start date."]},
+  {letter:"N", text:"Missing to give the disclaimer/narrative as per the playbook when the customer enquires about the Care Ultimate plan would be rated 3."}
+ ]},
+
+{code:"3.7", title:"Information to be shared over chat if discussed over call (Calls specific)", rating:3, type:"rating", medium:"call", lo:null, module:"docs",
+ rule:"Not sharing specific information over chat.",
+ notes:[
+  "If all mandatory information as per the SOP/playbook was not shared over the call but was shared over the chat, then that shall not be marked.",
+  "If any information was shared over the call but corrected in the chat, then that shall not be marked.",
+  "If the advisor gave the definition of a feature/rider over the call and said the limits/conditions related to the same over the chat, then that shall not be marked.",
+  "If the information as per the SOP/Playbook is completely shared over the call, and the advisor promised to share it over the chat but ended up not sharing the same, then that shall be Rated 3.",
+  "If an advisor had promised anything to the customer on chat or call, they need to send the same by the End Of the same Day promised, and the same EOD timeline is to be specified to the customer (not a vague timeline like \"in some time\", \"in a few hours\" etc.). Else, it would be Rated 3 even if the promised details were shared the next day.",
+  "If the advisor provides correct information during a call but shares incorrect information through chat, the error will be marked according to the SOP/Playbook if it pertains to the product. If the query is general, it will be Rated 3."
+ ],
+ annexure:[
+  {letter:"A", text:"Not sharing the premiums snips."},
+  {letter:"B", text:"Not sharing information about the riders included in the premiums, if not discussed over the call."},
+  {letter:"C", text:"Not sharing the policy wordings/brochure links of the discussed plans."},
+  {letter:"D", text:"Not sharing the exclusions links, specific illness links, or specific illness snips of the plans we sell and recommend to the customer."}
+ ]},
+
+{code:"3.8", title:"Query", rating:3, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Chat specific: mistake / missed a query, which is a general query. Call specific: mistake (general query) / missed a query (includes general query / product-related query).",
+ notes:["Chat and Call specific: if the pending notes for another profile discussion were not added, leading to a missed discussion on the same, it will be classified as a missed query and rated 3. In this case, the advisor who promised the customer to discuss one profile after another will be marked."],
+ annexure:[]},
+
+{code:"4.1", title:"Miscellaneous", rating:4, type:"rating", medium:"both", lo:null, module:"misc41",
+ rule:"Suggestions regarding scenarios that can potentially impact the customer experience, mitigate negative impacts, or enhance the customer experience.",
+ notes:["The Quality Assurance team will be actively involved in evaluating various subjective scenarios to ensure a comprehensive understanding of their potential impact on customer experience.","This is not an exhaustive list; there are a few other areas as well where, if mistakes/omissions are observed in the chat/call, it would be Rated 4."],
+ annexure:[
+  {letter:"A", text:"Sharing screenshots of internal documents, such as the Health FAQs, Operational Metrics sheet, etc. Only screenshots of documents which are in the public domain (e.g. policy brochures, Ditto website, etc.) are to be shared with the customer."},
+  {letter:"B", text:"Giving straightforward/robotic replies."},
+  {letter:"C", text:"Not sharing the network hospital links / not giving the correct network hospital number."},
+  {letter:"D", text:"Not sending H/Tax benefit in the multi-pay QR and discounts, if multi-pay premiums are shared. The advisor who shares multi-pay is responsible for sharing the H/Tax benefit in the multi-pay QR and discounts."},
+  {letter:"E", text:"Not informing the customer that if any plans or add-ons are not possible through Ditto, or about add-on availability for the customer to purchase, or that porting is not possible through Ditto."},
+  {letter:"F", text:"Not informing about the porting window when the porting window is not open."},
+  {letter:"G", text:"Missing out on discussing a premium increase due to inflation (14–18%) when the customer asks for it."},
+  {letter:"H", text:"Omission of conveying the chances of issuance depending on UW with respect to the PED riders."},
+  {letter:"I", text:"Missing out on advising or nudging for a minimum cover of 10L for customers who are looking for a lower cover."},
+  {letter:"J", text:"Answering the customer's query only partially correctly."},
+  {letter:"K", text:"Failure to inform the customer to disclose changes in lifestyle habits or PEDs to the insurer post-issuance, when customers ask for it."},
+  {letter:"L", text:"Advisors need to send one question and wait for the customer to answer it before sending the next of the 5 PED profiling questions. Do not send questions one after the other with no response from the customer. If all the questions together are sent in one message, then it would be Rated 4.", notes:["If the lead himself requests to ask all the questions at once, then that shall not be marked."]},
+  {letter:"M", text:"Not informing the customer to always send documents on the help ID from their registered email ID.", notes:["The Ops team cannot take it forward if you just post the docs in the Ops space. Please ask the customer to share documents via email on these IDs — Care, non-issued policies: help@joinditto.in and manjunatha.s@careinsurance.com. Care, issued policies: help@joinditto.in, customerfirst@careinsurance.com, and manjunatha.s@careinsurance.com."]},
+  {letter:"N", text:"Ditto sends notifications for renewals due / premiums due. When the customer asks for this, not informing the customer, or saying that Ditto does not send notifications, would be rated 4."},
+  {letter:"O", text:"Not recommending OS and AOM when self and spouse are looking for a plan with 3 children, depending upon medical eligibility.", notes:["Advisors can also give 2 separate plans in CS if they want to, along with the above recommendation."]},
+  {letter:"P", text:"If the advisor didn't provide the UW disclaimer when the customer is asking about porting/migration scenarios for future cases."},
+  {letter:"Q", text:"If the advisor didn't provide the UW disclaimer when the customer is asking about increasing the cover amount / adding new members to the plan for future cases."},
+  {letter:"R", text:"If the customer specifically asks if he can pay the premiums through any account, advisors are expected to give the heads-up that if the proposer is looking for tax benefits, it's better to pay from the proposer's bank account itself to avoid any hassles when they claim the tax benefits, or that they can check with their CA if this is feasible."},
+  {letter:"S", text:"Chat specific: not editing the customer's name when required, in the introduction message.", notes:["Example: if the customer's name is an emoji, addressing the customer with the emoji would be considered an error. If unsure of the name, the advisor can use \"hey there\"."]}
+ ]},
+
+{code:"4.2", title:"Purchase message / Pitching Ditto", rating:4, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Missing out on discussing Ditto's services and value additions.",
+ notes:[], annexure:[]},
+
+{code:"4.3", title:"QRs", rating:4, type:"rating", medium:"both", lo:null, module:"conduct",
+ rule:"Repeating QRs / not modifying the QRs whenever required.",
+ notes:["Repetition of QRs is acceptable if the lead conversation has started again after 30 days from the last message of the last conversation."],
+ annexure:[]},
+
+{code:"5.1", title:"Highlighting", rating:null, type:"suggestion", medium:"both", lo:null, module:"suggestions",
+ rule:"Suggestions regarding scenarios that do not potentially impact the customer experience, mitigate negative impacts, or enhance the customer experience.",
+ notes:[],
+ annexure:[
+  {letter:"A", text:"Proactiveness — in case the QA Associate feels that the advisor could have been more proactive in their reply."},
+  {letter:"B", text:"Not understanding why the customer is looking to cancel/discontinue their existing plan — which is also our recommendation / a plan from our recommended companies — and then addressing the same and recommending plans accordingly."},
+  {letter:"C", text:"Not giving the difference between top-ups and super-top-ups whenever required, or when the customer is confused about the same, or asked for top-ups instead of super-top-ups."},
+  {letter:"D", text:"Not acknowledging the customer's statement."},
+  {letter:"E", text:"A missed query that was addressed when the customer asked again."},
+  {letter:"F", text:"Information that is unrelated to the customer's query, which may result in overloading the customer with unnecessary details."},
+  {letter:"G", text:"Slip of the tongue (in case it affects the customer experience)."},
+  {letter:"H", text:"Not informing the customer about price hikes."},
+  {letter:"I", text:"Appropriate nudge messages need to be sent."},
+  {letter:"J", text:"Correction of information due to the customer's query."}
+ ]},
+
+{code:"Rating 5", title:"No mistake", rating:5, type:"rating", medium:"both", lo:null, module:"rating5",
+ rule:"A perfect chat/call with minor suggestions that do not affect the customer experience, no areas of improvement, and all the customer's expectations and requirements have been met.",
+ notes:[], annexure:[]},
+
+{code:"6.1 (1)", title:"Persona — Recommendation/Rider/Premium errors from persona", rating:null, type:"persona", medium:"both", lo:null, module:"persona",
+ rule:"If any incorrect recommendations, incorrect rider suggestions, or incorrect premiums result from errors in the persona, these will be marked as wrong recommendations, wrong rider suggestions, or wrong premiums against the advisor responsible for the persona error.",
+ notes:[
+  "If the mandatory details like age and pincode within the persona are not correctly entered by the advisor by the End Of the same Day they spoke with the customer, it will be rated 4.",
+  "Not capturing or not correctly entering the details of the Date of Renewal (porting cases only) would be highlighted.",
+  "Not mentioning / incorrect details mentioned for PED / the 5 PED profiling questions in the persona by EOD, if asked in chat/call, would be rated 2.",
+  "Advisors have the leniency to ask the 5 PED profiling questions without changing/missing the context of the questions, either in chat/call/payment, but should ask all of them in either chat/call/payment. If not, they have to mention the pending query in Notes/persona for the advisor to ask on the payment call. Else, it would be rated 3."
+ ], annexure:[]},
+
+{code:"6.1 (2)", title:"Persona — Pending flow not noted", rating:1, type:"persona", medium:"both", lo:"non-LO", module:"persona",
+ rule:"Any flow that is pending needs to be noted in Persona/pending template by the advisor who is closing the chat, else would be Rated 1 (applicable for Non-LO).",
+ notes:[], annexure:[]},
+
+{code:"Checklist-A", title:"LO Checklist — detail shared but not recorded", rating:4, type:"persona", medium:"both", lo:"LO", module:"checklist",
+ rule:"Not recording in the checklist if a detail is shared would be Rated 4.",
+ notes:[], annexure:[]},
+
+{code:"Checklist-B", title:"LO Checklist — detail marked as shared but was not", rating:null, type:"persona", medium:"both", lo:"LO", module:"checklist",
+ rule:"If a detail is not shared but marked as shared in the checklist, it would be rated according to the SOP.",
+ notes:[
+  "Example: if network hospital links were not shared with the customer but the checklist was updated as done, then it would be Rated 4 as per the SOP.",
+  "Example: if permanent exclusions were not shared for one of the recommended plans but the checklist was updated as done, it would be Rated 1."
+ ], annexure:[]},
+
+{code:"Checklist-C", title:"LO Checklist — not created at all", rating:3, type:"persona", medium:"both", lo:"LO", module:"checklist",
+ rule:"Not creating a checklist at all would be Rated 3, if the chat is handled by the LO advisor.",
+ notes:[], annexure:[]},
+
+{code:"Checklist-D", title:"LO Checklist — non-LO to LO transition", rating:3, type:"persona", medium:"both", lo:"LO", module:"checklist",
+ rule:"In cases of chat transition from non-LO to LO, LO advisors must create and update the checklist for any details discussed, else it will be Rated 3.",
+ notes:["Advisors can leave the field empty if not shared with the customer, and 'NA' if it does not need to be discussed with the customer."], annexure:[]},
+
+{code:"6.1 (3)", title:"Persona — All other errors", rating:null, type:"persona", medium:"both", lo:null, module:"persona",
+ rule:"All other errors identified in the persona will be highlighted.",
+ notes:[], annexure:[]}
+];
+// General procedural notes that govern how every SOP code is applied.
+// Sourced from Step 2 ("Additional Guidance", "Important Note") and the LO guidance
+// paragraph in the main body of the SOP. Included because they are strictly necessary
+// to correctly interpret the rating codes and annexure.
+const GENERAL_NOTES = [
+ {title:"Medium applies unless stated otherwise", text:"If no medium is specified, the SOP applies to both chats/calls. If a specific medium is mentioned, then the point would apply only for that medium."},
+ {title:"Markings apply only to new information", text:"Markings apply only if the information has not been shared previously. Advisors should review notes and personas before taking up the chat/call."},
+ {title:"LO guidelines", text:"In the LO context, advisors should not overload customers with information even before closing a chat, or after the customer leaves the chat. They should discuss all checklist items with the customer before getting on a payment call, even if needed through multiple conversations. After each chat or call, an advisor also needs to update the checklist by ticking the items discussed, or by noting what still needs to be discussed in the pending notes. When the checklist or pending notes is updated wherever needed, QA will not penalize the advisor for it."}
+];
+
+// The Rating Framework scale, as defined in the SOP's Scope & Policy Elements table.
+const RATING_SCALE = [
+ {n:1, label:"Blunder", c:"var(--r1)"},
+ {n:2, label:"Blunder", c:"var(--r2)"},
+ {n:3, label:"Mild", c:"var(--r3)"},
+ {n:4, label:"Small", c:"var(--r4)"},
+ {n:5, label:"No mistake", c:"var(--r5)"}
+];
+
+// Learning modules — thematic groupings of the SOP codes above, for teaching purposes only.
+// Grouping is an organisational device; it does not add, remove, or alter any SOP rule.
+const MODULES = [
+ {id:"profiling", title:"Medical Profiling & Recommendations", sub:"1.1", codes:["1.1"]},
+ {id:"premiums", title:"Premiums & Loading Charges", sub:"1.2 · 1.5 · 3.3", codes:["1.2","1.5","3.3"]},
+ {id:"underwriting", title:"Underwriting Heads-up", sub:"1.3", codes:["1.3"]},
+ {id:"waiting-exclusions", title:"Waiting Periods & Exclusions", sub:"1.4 · 1.6", codes:["1.4","1.6"]},
+ {id:"porting", title:"Porting & Migration", sub:"1.7 · 1.8", codes:["1.7","1.8"]},
+ {id:"features", title:"Policy Features (Copay, OPD, Maternity, Bonus, Daycare...)", sub:"1.9 · 2.1 · 3.2", codes:["1.9","2.1","3.2"]},
+ {id:"riders", title:"Riders", sub:"3.4", codes:["3.4"]},
+ {id:"docs", title:"Snips, Brochures & Chat/Call Documentation", sub:"1.10 · 3.7", codes:["1.10","3.7"]},
+ {id:"conduct", title:"Conduct, Query Handling & Reviews", sub:"1.11 · 1.12 · 3.1 · 3.5 · 3.8 · 4.2 · 4.3", codes:["1.11","1.12","3.1","3.5","3.8","4.2","4.3"]},
+ {id:"misc36", title:"Miscellaneous — Rating 3", sub:"3.6", codes:["3.6"]},
+ {id:"misc41", title:"Miscellaneous — Rating 4", sub:"4.1", codes:["4.1"]},
+ {id:"suggestions", title:"Suggestions (Highlighting)", sub:"5.1", codes:["5.1"]},
+ {id:"rating5", title:"What a Rating 5 looks like", sub:"Rating 5", codes:["Rating 5"]},
+ {id:"persona", title:"Persona Accuracy", sub:"6.1", codes:["6.1 (1)","6.1 (2)","6.1 (3)"]},
+ {id:"checklist", title:"LO Checklist Discipline", sub:"6.1 · LO only", codes:["Checklist-A","Checklist-B","Checklist-C","Checklist-D"]}
+];
+
+// Rating Boundaries — juxtapositions the SOP itself draws between similar-looking
+// mistakes that land at different ratings. Every pairing quotes/paraphrases only
+// what the SOP states; the "why" text restates the SOP's own reasoning, not new logic.
+const BOUNDARIES = [
+ {
+  title:"Restoration/Bonus explanation gaps: comprehensive plan vs restrictive plan",
+  left:{rating:3, text:"Missed query or wrong/omitted info on Cumulative Bonus, NCB, Restoration in comprehensive plans (e.g. HDFC Optima Secure, Care Supreme)."},
+  right:{rating:2, text:"The same miss, in restrictive plans (e.g. Care Heart, Care Freedom)."},
+  why:"3.2.B's note sets the rating by plan type: comprehensive plans are Rated 3, restrictive plans are Rated 2, for the same category of missed detail.",
+  source:"3.2.B"
+ },
+ {
+  title:"Cover-amount misinformation: porting vs normal case",
+  left:{rating:1, text:"Misinformation about available cover amounts in a porting case."},
+  right:{rating:3, text:"The same misinformation in a normal (non-porting) case."},
+  why:"1.9's note explicitly splits this by case type — porting misinformation is Rated 1, normal-case misinformation is Rated 3.",
+  source:"1.9 (note)"
+ },
+ {
+  title:"Persona pending-flow discipline: Non-LO vs LO",
+  left:{rating:1, text:"Non-LO: a pending flow not noted in Persona/pending template by the advisor closing the chat."},
+  right:{rating:3, text:"LO: not creating a checklist at all, or not updating it after a non-LO-to-LO transition."},
+  why:"6.1(2) rates the non-LO pending-note failure at 1; the LO-specific checklist rules (Checklist-C, Checklist-D) rate the equivalent LO gaps at 3 — the LO checklist replaces the persona pending-note requirement for LO advisors.",
+  source:"6.1 (2) · Checklist C/D"
+ },
+ {
+  title:"LO checklist: detail simply unrecorded vs falsely marked done",
+  left:{rating:4, text:"A shared detail exists but wasn't ticked/recorded in the checklist."},
+  right:{rating:"per SOP", text:"A detail marked as shared in the checklist that was not actually shared — rated according to whatever the underlying SOP code for that missed detail says (can be as severe as Rating 1)."},
+  why:"Checklist-A treats an unrecorded-but-shared detail as a small (Rating 4) documentation gap. Checklist-B treats a falsely-marked checklist as the underlying substantive error it conceals — e.g. permanent exclusions marked done but not shared is Rated 1, network hospital links marked done but not shared is Rated 4.",
+  source:"Checklist A/B"
+ },
+ {
+  title:"4.1 Miscellaneous vs 5.1 Highlighting",
+  left:{rating:4, text:"Scenarios that CAN potentially impact the customer experience, mitigate negative impacts, or enhance the customer experience."},
+  right:{rating:"Suggestion", text:"Scenarios that do NOT potentially impact the customer experience, mitigate negative impacts, or enhance the customer experience."},
+  why:"The SOP defines 4.1 and 5.1 with mirrored wording, differing only in whether customer-experience impact is present — that single word (\"can\" vs \"do not\") is the dividing line between a Rating 4 and a non-numeric Suggestion.",
+  source:"4.1 · 5.1"
+ },
+ {
+  title:"OPD disclaimer: HDFC/Care add-ons vs every other plan",
+  left:{rating:"Not marked", text:"Pitching Care OPD add-ons, or Optima Well-being with the playbook narrative, when the recommended plans are from HDFC or Care and offer OPD benefits — the general OPD disclaimer is not required in this specific case."},
+  right:{rating:3, text:"For all other cases, where the recommended plans are not OS variants or Care plans, the advisor must give the general OPD disclaimer."},
+  why:"1.9.C ties the disclaimer requirement to which plans are recommended — HDFC/Care OPD add-ons substitute the playbook narrative for the general disclaimer, while every other plan combination still requires it; omitting it there is Rated 3.",
+  source:"1.9.C"
+ },
+ {
+  title:"PED question wording: skipping bolded text vs skipping a whole question",
+  left:{rating:4, text:"Skipping the entire bolded text/word under one of the 5 PED profiling questions."},
+  right:{rating:1, text:"Missing one of the 5 PED profiling questions completely."},
+  why:"1.1.K draws this line explicitly: a wording omission is Rated 4, but omitting a full question is still Rated 1 regardless of how the rest of the profiling went.",
+  source:"1.1.K"
+ },
+ {
+  title:"Renewal Notice requests: over-asking vs under-asking",
+  left:{rating:1, text:"Asking for a Renewal Notice (and stalling payment on it) when the lead is going with the same or a lower cover amount than the existing plan — where it isn't required."},
+  right:{rating:1, text:"Not asking for a Renewal Notice when the lead is going with a higher cover amount than the existing cover — where it is required."},
+  why:"3.6.G rates both the unnecessary ask and the missed necessary ask at 1 — the SOP treats getting the Renewal Notice requirement wrong, in either direction, as equally serious.",
+  source:"3.6.G"
+ }
+];
+
+// Scenario-based learning — every scenario is drawn directly from a situation the SOP or
+// Annexure explicitly describes. No invented facts are added.
+const SCENARIOS = [
+ {
+  q:"A customer discloses mid-conversation, while discussing a fresh plan, that they already hold an existing health policy.",
+  ask:"What should the advisor do, and what happens if they don't?",
+  answer:"The advisor should switch to the porting pitch immediately. Not following the porting flow when a customer with an existing plan is looking to buy a new plan is Rated 1.",
+  code:"1.7.A", rating:1
+ },
+ {
+  q:"A customer with Diabetes Type 1, on insulin shots, is being profiled. The Disease-Wise Tool recommends the Energy plan with HIGH chances of rejection.",
+  ask:"What must the advisor say, and what's the error if they only say \"there are chances of rejection\" without the word \"high\"?",
+  answer:"The advisor must convey that the chances of rejection are HIGH, not just that there are chances of rejection. Omitting the word \"high\" when the DWT specifies outright/high rejection chances is Rated 3 under Miscellaneous.",
+  code:"3.6.C", rating:3
+ },
+ {
+  q:"An advisor is about to send the 5 mandatory PED profiling questions and sends all five in one message, back-to-back, without waiting for the customer's response to each.",
+  ask:"Is this acceptable, and if not, what rating does it attract?",
+  answer:"Not acceptable as a default. Advisors need to send one question and wait for the customer's answer before sending the next. Sending all 5 questions together in one message is Rated 4 — unless the lead themself requested to be asked all the questions at once, in which case it is not marked.",
+  code:"4.1.L", rating:4
+ },
+ {
+  q:"A customer, still adamant about the Care Ultimate plan after the advisor has already given the required narrative/disclaimer, wants to keep discussing it.",
+  ask:"Should the advisor continue the plan discussion or decline it as unavailable?",
+  answer:"The advisor should proceed with the plan discussion. Not discussing the plan, or stating it is unavailable, after the customer still chooses to opt for it post-disclaimer, is Rated 1.",
+  code:"1.1.M", rating:1
+ },
+ {
+  q:"A customer with a PED wants to lower the waiting period on that PED, but the DWT shows no waiting period applies to that specific condition.",
+  ask:"Should the advisor suggest a waiting-period-reduction rider anyway?",
+  answer:"No. Suggesting riders to reduce waiting periods when the DWT already shows no waiting period for that condition is Rated 1 — the rider suggestion is unnecessary and incorrect in this context.",
+  code:"1.4.G", rating:1
+ },
+ {
+  q:"A customer's cover-amount question comes up in a porting case, and the advisor gives the wrong available cover amount.",
+  ask:"How does this compare to giving the wrong cover amount in a normal (non-porting) case?",
+  answer:"Misinformation about available cover amounts in a porting case is Rated 1. The same misinformation in a normal (non-porting) case is Rated 3 — porting cases carry the stricter rating.",
+  code:"1.9 (note)", rating:1
+ },
+ {
+  q:"A customer's name field shows an emoji instead of a name, and the advisor uses it as-is in the introduction message.",
+  ask:"Is this an error, and what should the advisor have done instead?",
+  answer:"Yes — not editing the customer's name when required in the introduction message is an error (e.g. addressing the customer with an emoji). If unsure of the customer's real name, the advisor can use \"hey there\" instead. This is a Chat-specific point under Miscellaneous, Rated 4.",
+  code:"4.1.S", rating:4
+ },
+ {
+  q:"An advisor shares multi-pay premiums with a customer but does not send the H/Tax benefit information in the multi-pay QR and discounts.",
+  ask:"Who is responsible, and what's the rating?",
+  answer:"The advisor who shares the multi-pay premiums is responsible for also sending the H/Tax benefit in the multi-pay QR and discounts. Not doing so is Rated 4 under Miscellaneous.",
+  code:"4.1.D", rating:4
+ },
+ {
+  q:"A lead is enhancing their cover amount during porting and is going with a HIGHER cover amount than their existing plan, but the advisor doesn't ask for the Renewal Notice.",
+  ask:"Was a Renewal Notice required here, and what's the consequence of missing it?",
+  answer:"Yes — a Renewal Notice is required when the lead is going with a higher cover amount than the existing cover, to get porting benefits on the bonus part. Not asking for it in this case is Rated 1.",
+  code:"3.6.G", rating:1
+ },
+ {
+  q:"A customer, borderline in age, mentions being \"about 55\" — right at the edge of where the recommended plan (Energy) would change.",
+  ask:"What must the advisor do before finalising the recommendation?",
+  answer:"The advisor doing the profiling must ask for the exact age or verify the date of birth, since the age is borderline and affects the recommendation. Not asking for exact ages / not verifying DOB in such borderline cases is Rated 1.",
+  code:"1.1.H", rating:1
+ },
+ {
+  q:"A customer who is an NRI proposer, looking to insure a person living in India, doesn't get any nudge from the advisor about who could be the proposer instead.",
+  ask:"What should the advisor have nudged the customer toward?",
+  answer:"The advisor should nudge the customer to have either the insured become the proposer, or a sibling, or any other person from India become the proposer. Not nudging this is Rated 4.",
+  code:"3.6.F", rating:4
+ },
+ {
+  q:"A customer explains their Period of Insurance runs 12-05-2026 to 11-05-2027 and asks the advisor to explain the Start Date versus the Issuance Date.",
+  ask:"What is the correct Start Date here, and what happens if the advisor explains this incorrectly?",
+  answer:"The Start Date corresponds to the beginning date in the \"Period of Insurance\" section — here, 12-05-2026. The Issuance Date determines the 30-day free-look period timeline, while the Start Date is the basis for the Coverage Start Date and Waiting Periods. Any mistake explaining this when the customer enquired is Rated 3.",
+  code:"3.6.M", rating:3
+ },
+ {
+  q:"An LO advisor updates the checklist marking that network hospital links were shared with the customer, but they were, in fact, never sent.",
+  ask:"What rating does this attract?",
+  answer:"This is rated according to what the underlying SOP code says for the missed detail — network hospital links not shared is Rated 4 per the SOP, so a checklist falsely marked \"done\" for this item is Rated 4.",
+  code:"Checklist-B", rating:4
+ },
+ {
+  q:"The same LO scenario, but the checklist was falsely marked \"done\" for permanent exclusions that were never shared for one of the recommended plans.",
+  ask:"Does the rating change compared to the network-hospital-links example?",
+  answer:"Yes — because the underlying missed detail is more severe. Permanent exclusions not shared but marked done in the checklist is Rated 1, since exclusion mistakes/omissions are governed by 1.6, a Rating 1 code.",
+  code:"Checklist-B", rating:1
+ },
+ {
+  q:"A customer with a PED insists on not disclosing it, even after the advisor has given the non-disclosure disclaimer explaining claim rejection and possible policy termination risk.",
+  ask:"How should the advisor proceed?",
+  answer:"The advisor should inform the lead that Ditto will still help with the application, but if any claim issue arises related to the non-disclosed PED, or the claim is denied due to non-disclosure, Ditto will not be able to help with that particular claim on account of the non-disclosure.",
+  code:"1.3.F", rating:1
+ }
+];
+// Common Mistakes — derived from DH87 Common Mistakes (internal QA feedback log).
+// 126 audited chats/calls reviewed; 77 (61%) carried at least one Red or Orange flag;
+// 99 individual issues were logged across those 77 records. Counts below come directly
+// from tallying the category labels advisors/QA used in that log. Every "ideal approach"
+// bullet restates the matching SOP code already defined in RULES — nothing new is introduced.
+const FEEDBACK_STATS = {total:126, flagged:77, pct:61, issues:99};
+
+const MISTAKES = [
+ {
+  title:"Checklist not created, or not updated to reflect what was actually shared",
+  count:"41 flagged mentions — the single most common gap in the log",
+  codes:["6.1","Checklist-A","Checklist-B","Checklist-C","Checklist-D"],
+  wrong:[
+   "Checklist wasn't created at all for chats handled by an LO advisor, on repeated occasions.",
+   "Premiums shared with the customer (e.g. for 15L or 25L cover) were never recorded in the checklist, or the cover amount recorded didn't match what was actually shared.",
+   "Riders added to premiums (CBS, CBB, ABCD, Wellness Benefit) were logged ambiguously — e.g. simply as \"CBB/CBS\" with no clarity on which rider was actually added.",
+   "Fields were marked \"shared\"/\"done\" — network hospital list, residential status, comparison snip, specific-illness links — when the detail either wasn't sent for every recommended plan, or wasn't sent at all."
+  ],
+  ideal:[
+   "Create the checklist before closing any LO chat — not creating one at all is Rated 3 (Checklist-C).",
+   "Record each detail — premiums, cover amount, riders, recommended plans — the moment it's shared, naming exactly which plan or rider it applies to, not a generic summary.",
+   "Never mark a field \"done\" unless it was actually sent — a false \"done\" entry is rated per the underlying missed detail, which can run as severe as Rating 1 (Checklist-B).",
+   "A detail that was shared but simply not ticked is a smaller gap — Rated 4 (Checklist-A) — but still worth closing every time."
+  ]
+ },
+ {
+  title:"Recommended riders not added to premiums, or explained incompletely",
+  count:"13 flagged mentions",
+  codes:["3.4","1.2.B","1.9"],
+  wrong:[
+   "Wellness Benefit and CBB were identified as recommended riders during the conversation but never added to the shared premiums, and not even logged as pending.",
+   "Optima Well-being was recommended, but the required playbook narrative on why it was — or wasn't — being recommended was never given clearly.",
+   "CBS/CBB explanation in a QR left out two required playbook points: that a lead can pick either CB Super or CB Booster, and that switching between them forfeits the bonus already collected under the existing add-on.",
+   "Wellness Benefit was explained without the required step count or discount grid."
+  ],
+  ideal:[
+   "Recommended and mandatory riders must be added during premium calculation, or explicitly logged as pending if not yet confirmed — not doing either is Rated 3 under 3.4.",
+   "Sharing premiums without riders the customer requested, or was promised, is Rated 1 under 1.2.B.",
+   "Rider explanations must match the playbook in full, including secondary details like switch/forfeiture conditions — a partial explanation leaves the customer without the full picture of what they're buying."
+  ]
+ },
+ {
+  title:"Medical profiling left incomplete before a recommendation was given",
+  count:"9 flagged mentions",
+  codes:["1.1.A","1.1.D","1.1.E","1.1.F","1.1.K"],
+  wrong:[
+   "A lead answered only 3 of 4 medical questions, and the advisor didn't nudge again to confirm the missing one (hospitalisation history).",
+   "A recommendation was given based purely on the customer's own declaration, without asking all profiling questions first.",
+   "A lead mentioned \"no other major hospitalisation\" right after disclosing two separate conditions — the advisor didn't probe whether there was any minor hospitalisation, which can still matter for underwriting.",
+   "A premature baby who'd been kept in NICU was mentioned, but the advisor didn't request medical reports for the medical team to review before finalising a recommendation."
+  ],
+  ideal:[
+   "All mandatory profiling questions — whom, age, past hospitalisations, current/previous medications, medical diagnoses — must be asked before recommending, even if some conditions were already disclosed (1.1.A).",
+   "Follow up on incomplete or ambiguous answers before moving on — a missed mandatory DWT question that could change the recommendation is Rated 1 (1.1.D).",
+   "Where the advisor is unsure about a condition, request reports and route the query through the medical queries space using the chat ID, rather than guessing (1.1.E)."
+  ]
+ },
+ {
+  title:"Persona not updated with medical details the lead actually shared",
+  count:"7 flagged mentions",
+  codes:["6.1 (1)"],
+  wrong:[
+   "A lead disclosed a PED — a fracture with implant, a lymph node TB diagnosis — that was never captured anywhere in the Persona.",
+   "A follow-up answer to a medical question (e.g. that a spouse never consumed alcohol) was obtained verbally but never logged in the Persona.",
+   "A customer corrected their age mid-conversation, but the Persona was never updated to reflect it."
+  ],
+  ideal:[
+   "Any PED or medical detail the lead shares must be captured in the Persona — missed or incorrect PED details in the Persona are Rated 2.",
+   "Mandatory details like age and pincode must be correctly entered in the Persona by the End Of the same Day the advisor spoke with the customer, else it's Rated 4."
+  ]
+ },
+ {
+  title:"Premium calculation and proposer/pincode accuracy",
+  count:"9 flagged mentions (6 calculation + 3 proposer)",
+  codes:["1.2.A","1.2.C","1.2.D","1.1.C"],
+  wrong:[
+   "Porting premiums were generated using the Falcon tool — meant for fresh cases — instead of the OS porting premium tool or the 1up portal link.",
+   "Premiums were shared using the parents' pincode as proposer without confirming it, when the lead had filled the form as self.",
+   "A lead's age, on record from over a year earlier, wasn't reconfirmed before premiums were shared.",
+   "An NRI's spouse was made the proposer partway through the conversation, but her residential status wasn't confirmed before premiums went out."
+  ],
+  ideal:[
+   "For porting cases, use only the OS porting premium tool or the 1up portal link — Falcon applies a fresh-case discount that doesn't belong in a porting quote (1.2.D).",
+   "Confirm who the proposer is, and their current pincode, for every profile before sharing premiums — especially with multiple profiles or a change of proposer (1.2.A).",
+   "Reconfirm age, medical profile, and current address of the proposer whenever a lead returns after a gap — at the 90-day mark at the latest, ideally by 30 days (1.1.C)."
+  ]
+ },
+ {
+  title:"Recommendation accuracy — age eligibility, plan combinations, insurer fit",
+  count:"5 flagged mentions",
+  codes:["1.1.B","1.1.G","3.6.F"],
+  wrong:[
+   "OS+ was recommended for a customer's mother despite her age being above the plan's eligibility cutoff.",
+   "A floater-combination detail was missed — self and both parents can't be enrolled together in Care Supreme unless one parent is the proposer.",
+   "An NRI lead was recommended Aditya Birla plans — an insurer Ditto does not support for NRI customers."
+  ],
+  ideal:[
+   "Recommendations must align with the disease-wise tool and age-eligibility conditions like OS+'s age restriction — a mismatch here is Rated 1 (1.1.B).",
+   "Give the correct individual/floater combinations wherever possible with the insurer, including any condition affecting who can be enrolled together (1.1.G).",
+   "For NRI customers, recommend only the insurers Ditto supports for NRI cases, with the required disclaimer given."
+  ]
+ },
+ {
+  title:"Customer queries or promised follow-ups left unanswered",
+  count:"4 flagged mentions",
+  codes:["3.7.A","3.8","4.1.J"],
+  wrong:[
+   "A customer's direct question about the ballpark cost went unanswered in the conversation.",
+   "An advisor promised to send OPD-rider information and confirm Optima Well-being limits over chat, but never followed up.",
+   "A general query was answered only partially — leaving out relevant context the customer needed, such as naming only one insurer that covers extreme cases when others also do."
+  ],
+  ideal:[
+   "Anything promised to a customer on chat or call must be sent by the End Of the same Day, with a specific timeline given up front — not a vague \"in some time\" (3.7's notes).",
+   "A missed or only-partially-answered general query is Rated 3 (3.8) — check that every part of a customer's question has been addressed before moving on."
+  ]
+ },
+ {
+  title:"Loading charges and per-plan policy-feature detail not repeated for every plan",
+  count:"6 flagged mentions (3 loading charges + 3 policy features)",
+  codes:["1.5.A","3.3","1.9"],
+  wrong:[
+   "Loading charges were shared for one recommended plan (HDFC) but not for a second plan added later (AOM) — while the checklist recorded loading charges as sent for both.",
+   "When asked about Aditya Birla's loading charges, the advisor said the amount \"depends on underwriting\" but left out the usual 10–40% range.",
+   "Permanent exclusions weren't shared for one of two recommended plans (AOM), and the gap wasn't flagged anywhere in the notes."
+  ],
+  ideal:[
+   "Loading charges must be disclosed for every recommended plan that carries a PED or abnormal-BMI loading — not only the first plan discussed (1.5.A).",
+   "Where an exact percentage isn't available, still share the general range so the customer isn't left without any expectation (3.3).",
+   "Exclusion and policy-feature details must be given per recommended plan — a detail shared for one plan doesn't carry over to a second plan added later in the same conversation (1.9)."
+  ]
+ },
+ {
+  title:"Tax Benefit QR not shared alongside multi-pay/multi-year premiums",
+  count:"7 flagged mentions, recurring across several unrelated chats",
+  codes:["4.1.D"],
+  wrong:[
+   "Multi-pay premiums were shared, but the H/Tax Benefit QR and applicable discounts were not sent alongside them.",
+   "Multi-year premiums were shared with no follow-up on the associated tax-benefit information."
+  ],
+  ideal:[
+   "Whenever multi-pay premiums are shared, the H/Tax Benefit QR and discounts must be sent in the same breath — the advisor who shares the multi-pay premiums is responsible for this, and missing it is Rated 4 (4.1.D)."
+  ]
+ }
+];
+const QUIZ = [
+ {
+  q:"An advisor recommends a plan without asking about the customer's past hospitalisations or current medications. What rating does this attract?",
+  options:["Rating 3 — Mild","Rating 1 — Blunder","Rating 4 — Small","Suggestion only"],
+  correct:1,
+  explain:"Not asking all mandatory profiling questions (whom, age, past hospitalisations, current/previous medications, medical diagnoses) falls under 1.1.A, Rated 1."
+ },
+ {
+  q:"A customer's condition is not covered in the Disease-Wise Tool and the advisor is unsure whether it could cause issues at claim time. What must the advisor do?",
+  options:["Proceed with a standard recommendation","Check with the medical team and give the appropriate heads-up","Tell the customer to check with the insurer directly","Wait for the customer to raise it again"],
+  correct:1,
+  explain:"Per the note under 1.3.C, if the customer's disease is not covered in the DWT and causes even slight confusion, the advisor is expected to check with the medical team and give the appropriate heads-up."
+ },
+ {
+  q:"A customer wants a review of their existing PED policy. Which features must the advisor discuss, per 3.1?",
+  options:["Only Room Rent and Co-pay","Room Rent, Disease-wise limits, Co-pay, Bonus, Restoration","Room Rent, Disease-wise limits, Co-pay, Bonus, Restoration, and Waiting periods","Only the waiting periods"],
+  correct:2,
+  explain:"3.1 requires Room Rent, Disease-wise limits, Co-pay, Bonus, and Restoration for a No-PED case — and additionally Waiting periods for a PED case."
+ },
+ {
+  q:"During a call, an advisor gives all mandatory information correctly but forgets to send the premium snips over chat afterward. Which code applies, and what's the rating?",
+  options:["1.2 Premiums, Rated 1","3.7.A, Rated 3","4.1 Miscellaneous, Rated 4","5.1 Highlighting, Suggestion only"],
+  correct:1,
+  explain:"3.7.A covers not sharing premium snips over chat when discussed over a call. Per 3.7's notes, if info was completely shared over the call but promised over chat and never sent, it is Rated 3."
+ },
+ {
+  q:"An advisor recommends the Chronic Care rider in Aditya Birla for more than one PED in the specified list, but doesn't mention that the loading-charge waiver depends on underwriting. What's the rating?",
+  options:["Rating 4","Rating 3","Rating 1","Suggestion"],
+  correct:2,
+  explain:"1.5.A's note states that in this scenario, not informing the customer that the waiver of the loading charge depends on UW would be Rated 1."
+ },
+ {
+  q:"A customer asks about Cumulative Bonus/NCB, and the advisor omits the details for a restrictive plan like Care Freedom. What rating applies?",
+  options:["Rating 3","Rating 2","Rating 4","Rating 1"],
+  correct:1,
+  explain:"3.2.B's note specifies that wrong information or omissions about Restoration/Bonus in restrictive plans (like Care Heart, Care Freedom) are Rated 2, versus Rated 3 for comprehensive plans."
+ },
+ {
+  q:"A customer discloses mid-chat that they already have an existing health policy while the advisor is pitching a fresh plan. What should the advisor do?",
+  options:["Continue the fresh-plan pitch since porting wasn't requested","Switch to the porting pitch","Ask the customer to start a new chat for porting","Redirect immediately to the Renewal team"],
+  correct:1,
+  explain:"1.7.A's note states that if the customer discloses an existing plan mid-conversation, the advisor should switch to the porting pitch. Not following the porting flow is Rated 1."
+ },
+ {
+  q:"An advisor sends all 5 PED profiling questions in a single message, one after another, without waiting for answers. The lead did NOT ask for this. What's the outcome?",
+  options:["Not marked, since all questions were still asked","Rated 4 under 4.1.L","Rated 1 under 1.1.K","Suggestion under 5.1"],
+  correct:1,
+  explain:"4.1.L requires one question at a time with a wait for the customer's answer. Sending all 5 in one message (without the lead requesting it) is Rated 4."
+ },
+ {
+  q:"An advisor skips the entire bolded portion of one of the 5 PED questions, but still technically asks all 5 questions. What's the rating?",
+  options:["Rated 1, same as missing a question entirely","Rated 4","Not marked, since all 5 were asked","Rated 3"],
+  correct:1,
+  explain:"1.1.K's notes distinguish: skipping the bolded text/word under a question is Rated 4, while missing a question completely is still Rated 1."
+ },
+ {
+  q:"A customer wants maternity coverage and feels the Aspire Titanium+ maternity coverage is too low. What is the advisor expected to pitch?",
+  options:["No further add-on — the disclaimer is enough","OS+/OS with Parenthood Add-on only","The Fast Forward add-on","Whichever add-on the customer names"],
+  correct:2,
+  explain:"1.1.L's note states that advisors are expected to pitch the Fast Forward add-on in this scenario, else it would be Rated 1."
+ },
+ {
+  q:"A customer with a PED specific-illness-list condition asks about reducing the waiting period, and the advisor pitches the PED modification rider reduced to 1 year. What's the rating?",
+  options:["Rated 4, since a rider was still offered","Rated 1","Rated 3","Not marked"],
+  correct:1,
+  explain:"1.4.F's note states that pitching the PED modification rider to 1 year when the PED falls under the specific illness list is Rated 1."
+ },
+ {
+  q:"An advisor calculates premiums for a lead with multiple profiles in one chat, using a single pincode across all profiles without confirming who the proposer is for each. What's the rating, and who is responsible?",
+  options:["Rated 3, the QA associate is responsible","Rated 1, the advisor who calculated the premiums is responsible","Rated 4, the advisor who started the chat is responsible","Not marked if the premiums happen to be correct"],
+  correct:1,
+  explain:"1.2.A's note states this is Rated 1, and the advisor who calculates the premiums is responsible for confirming the correct proposer/pincode per profile."
+ },
+ {
+  q:"A customer's checklist (LO advisor) is marked as \"network hospital links shared,\" but they were never actually sent. What's the rating?",
+  options:["Rated 1, same as any false checklist entry","Rated 4, per the underlying SOP rating for that missed detail","Rated 3, for checklist inaccuracy generically","Highlighted only"],
+  correct:1,
+  explain:"Checklist-B states a falsely marked checklist entry is rated according to the underlying SOP code for that missed detail — network hospital links not shared is Rated 4 per 4.1.C, so this example is Rated 4."
+ },
+ {
+  q:"Using the same checklist scenario, but this time \"permanent exclusions\" were marked done without being shared. What's the rating?",
+  options:["Rated 4, same as before","Rated 1, since exclusion mistakes fall under 1.6","Rated 3","Highlighted only"],
+  correct:1,
+  explain:"Checklist-B's second example shows permanent exclusions falsely marked done as Rated 1, since exclusion omissions are governed by 1.6 (Rating 1)."
+ },
+ {
+  q:"An LO advisor never creates a checklist at all for a chat they are handling. What's the rating?",
+  options:["Rated 1","Rated 3","Rated 4","Not marked, since checklists are optional"],
+  correct:1,
+  explain:"Checklist-C states that not creating a checklist at all is Rated 3, if the chat is handled by the LO advisor."
+ },
+ {
+  q:"A non-LO advisor closes a chat with a pending flow that still needs follow-up, but does not note it in Persona/pending template. What's the rating?",
+  options:["Rated 3","Rated 1","Rated 4","Highlighted only"],
+  correct:1,
+  explain:"6.1(2) states this is Rated 1 (applicable for Non-LO advisors)."
+ },
+ {
+  q:"An international (NRI) customer is not asked about holding an Indian Passport before the advisor proceeds with profiling. What's the rating?",
+  options:["Rated 3","Rated 4","Rated 1","Highlighted only"],
+  correct:2,
+  explain:"1.1.J's note states the advisor doing profiling is responsible for the disclaimer, Indian passport check, proposer details, and pincode confirmation — else it is Rated 1."
+ },
+ {
+  q:"What is the key difference between a Rating 4 Miscellaneous point (4.1) and a Suggestion under Highlighting (5.1)?",
+  options:["4.1 items are chat-specific, 5.1 items are call-specific","4.1 covers scenarios that CAN impact customer experience; 5.1 covers scenarios that do NOT","4.1 is for LO advisors only; 5.1 is for non-LO advisors","There is no meaningful difference"],
+  correct:1,
+  explain:"4.1 and 5.1 are defined with mirrored language in the SOP — 4.1 covers scenarios that can potentially impact/mitigate/enhance customer experience (Rated 4), while 5.1 covers scenarios that do not (Suggestion only)."
+ },
+ {
+  q:"A customer's DOB is borderline for the recommended plan (e.g. \"about 55\" where Energy is the recommendation cutoff). What must happen before the recommendation is finalised?",
+  options:["The recommendation can proceed as-is since \"about 55\" is close enough","The advisor doing profiling must ask for the exact age or verify DOB","The customer must be asked to re-register","The advisor should default to the safer, more restrictive plan without asking"],
+  correct:1,
+  explain:"1.1.H requires the advisor doing profiling to ask for the exact age or verify DOB in borderline cases — not doing so is Rated 1."
+ },
+ {
+  q:"A chat is closed and reopened by the same lead 25 days later. The advisor repeats the same QRs already sent in the earlier conversation, unmodified. What's the outcome?",
+  options:["Not marked — QR repetition is always acceptable","Rated 4 — repetition isn't acceptable since fewer than 30 days had passed","Rated 1","Rated 3"],
+  correct:1,
+  explain:"4.3's note says QR repetition is acceptable only if the lead's conversation restarts after 30 days from the last message of the last conversation. At 25 days, the QR should have been modified — repeating it unmodified is an error under 4.3, Rated 4."
+ }
+];
+/* ---------------------------------------------------------------
+   Helpers
+--------------------------------------------------------------- */
+function ratingBadgeClass(rule){
+ if(rule.type==="suggestion") return "badge-sugg";
+ if(rule.type==="persona") return "badge-persona";
+ if(rule.rating) return "badge-"+rule.rating;
+ return "badge-outline";
+}
+function ratingBadgeLabel(rule){
+ if(rule.type==="suggestion") return "Suggestion";
+ if(rule.type==="persona"){
+  return rule.rating ? ("Persona · Rated "+rule.rating) : "Persona · Highlighted";
+ }
+ if(rule.rating===5) return "Rating 5 · No mistake";
+ if(rule.rating) return "Rating "+rule.rating;
+ return "Highlighted";
+}
+function ratingCssVar(rule){
+ if(rule.type==="suggestion") return "var(--sugg)";
+ if(rule.type==="persona") return "var(--persona)";
+ if(rule.rating) return "var(--r"+rule.rating+")";
+ return "var(--ink-faint)";
+}
+function mediumLabel(m){
+ if(m==="chat") return "Chat specific";
+ if(m==="call") return "Call specific";
+ return "Chat & Call";
+}
+function esc(s){
+ return String(s).replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+}
+function findRule(code){ return RULES.find(r=>r.code===code); }
+
+/* ---------------------------------------------------------------
+   Rule card renderer (shared by Explorer + Learning Modules)
+--------------------------------------------------------------- */
+function renderRuleCard(rule, opts){
+ opts = opts || {};
+ const hasMore = (rule.notes && rule.notes.length) || (rule.annexure && rule.annexure.length);
+ const uid = "rc_"+rule.code.replace(/[^a-zA-Z0-9]/g,"_")+"_"+Math.random().toString(36).slice(2,7);
+ let tags = "";
+ if(rule.medium && rule.medium!=="both"){
+  tags += `<span class="badge badge-outline">${mediumLabel(rule.medium)}</span>`;
+ }
+ if(rule.lo){
+  tags += `<span class="badge badge-outline">${rule.lo==="LO"?"LO advisors":"Non-LO"}</span>`;
+ }
+ let notesHtml = "";
+ if(rule.notes && rule.notes.length){
+  notesHtml = rule.notes.map(n=>`<div class="note-item">${esc(n)}</div>`).join("");
+ }
+ let annexHtml = "";
+ if(rule.annexure && rule.annexure.length){
+  annexHtml = `<div class="field-label" style="margin-top:${notesHtml?'12px':'0'}">Annexure detail</div>` +
+   rule.annexure.map(a=>{
+    let sub = "";
+    if(a.notes && a.notes.length){
+     sub = a.notes.map(n=>`<div class="note-item">${esc(n)}</div>`).join("");
+    }
+    return `<div class="annex-item"><span class="letter">${a.letter}</span>${esc(a.text)}${sub}</div>`;
+   }).join("");
+ }
+ const moreBlock = hasMore ? `
+  <div class="rule-more hidden" id="${uid}">
+   ${notesHtml}
+   ${annexHtml}
+  </div>
+  <button class="expand-btn" onclick="toggleMore('${uid}', this)">${opts.startOpen? 'Hide details' : 'Show notes & annexure detail ('+((rule.notes?rule.notes.length:0)+(rule.annexure?rule.annexure.length:0))+')'}</button>
+ ` : "";
+
+ return `
+ <div class="card rule-card" style="--c:${ratingCssVar(rule)}">
+  <div class="rule-head">
+   <div>
+    <div class="rule-code">${esc(rule.code)}</div>
+    <div class="rule-title">${esc(rule.title)}</div>
+   </div>
+   <span class="badge ${ratingBadgeClass(rule)}">${ratingBadgeLabel(rule)}</span>
+  </div>
+  <div class="rule-rule">${esc(rule.rule)}</div>
+  ${tags ? `<div class="rule-tags">${tags}</div>` : ""}
+  ${moreBlock}
+ </div>`;
+}
+function toggleMore(uid, btn){
+ const el = document.getElementById(uid);
+ el.classList.toggle("hidden");
+ const isOpen = !el.classList.contains("hidden");
+ btn.textContent = isOpen ? "Hide details" : btn.textContent.replace("Hide details","Show notes & annexure detail");
+ if(isOpen){
+  const count = el.querySelectorAll(".note-item, .annex-item").length;
+ }
+}
+
+/* ---------------------------------------------------------------
+   1. RATING FRAMEWORK VIEW
+--------------------------------------------------------------- */
+function renderFramework(){
+ const cards = RATING_SCALE.map(r=>{
+  const count = RULES.filter(x=>x.type==="rating" && x.rating===r.n).length;
+  return `<div class="card rating-card" style="--c:${r.c}" onclick="goExplorerFiltered('rating', ${r.n})">
+   <div class="num">${r.n}</div>
+   <div class="lbl">${r.label}</div>
+   <div class="desc">${r.n===1?"Most severe outcomes — incorrect advice, premiums, or exclusions.":r.n===2?"Serious miss on Daycare/STU explanations.":r.n===3?"Moderate gaps — product feature or process detail missed.":r.n===4?"Minor, correctable gaps in documentation or delivery.":"A clean chat/call meeting all customer expectations."}</div>
+   <div class="count">${count} SOP code${count===1?"":"s"}</div>
+  </div>`;
+ }).join("");
+
+ const suggCount = RULES.filter(r=>r.type==="suggestion").length;
+ const personaCount = RULES.filter(r=>r.type==="persona").length;
+
+ return `
+ <div class="eyebrow">Section 1</div>
+ <h2>Rating Framework</h2>
+ <p class="intro">Every audited chat or call is scored 1–5 as defined in SOP QAB03's Scope &amp; Policy Elements. Persona accuracy and Suggestions are scored separately, outside the 1–5 scale. Tap any rating to jump to its codes in the SOP Explorer.</p>
+
+ <div class="callout">
+  <b>Before you apply any rating, two rules govern every code below:</b>
+  <ul>
+   ${GENERAL_NOTES.map(n=>`<li><b>${esc(n.title)}:</b> ${esc(n.text)}</li>`).join("")}
+  </ul>
+ </div>
+
+ <div class="grid grid-5" style="margin-bottom:28px;">${cards}</div>
+
+ <div class="rail" style="margin-bottom:36px;"><span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span></div>
+
+ <div class="grid grid-2">
+  <div class="card" style="padding:18px 20px; cursor:pointer;" onclick="goExplorerFiltered('type','suggestion')">
+   <span class="badge badge-sugg">Suggestions</span>
+   <p style="font-size:13.5px; color:var(--ink-soft); margin:10px 0 0;">Code 5.1 (Highlighting) covers scenarios that <b>do not</b> potentially impact, mitigate, or enhance customer experience. These are noted but sit outside the 1–5 rating scale. ${suggCount} sub-point${suggCount===1?"":"s"} in the annexure.</p>
+  </div>
+  <div class="card" style="padding:18px 20px; cursor:pointer;" onclick="goExplorerFiltered('type','persona')">
+   <span class="badge badge-persona">Persona &amp; Checklist</span>
+   <p style="font-size:13.5px; color:var(--ink-soft); margin:10px 0 0;">Code 6.1 governs persona accuracy. Errors caused by a wrong persona are marked against the underlying error type (recommendation/rider/premium); other persona and LO-checklist gaps carry their own fixed ratings. ${personaCount} codes.</p>
+  </div>
+ </div>
+ <p class="footer-note">Source: SOP #QAB03 — Scope &amp; Policy Elements.</p>
+ `;
+}
+
+/* ---------------------------------------------------------------
+   2. SOP EXPLORER VIEW
+--------------------------------------------------------------- */
+let explorerState = {q:"", rating:"all", type:"all"};
+function renderExplorer(){
+ return `
+ <div class="eyebrow">Section 2</div>
+ <h2>SOP Explorer</h2>
+ <p class="intro">Search or filter every SOP code and its annexure detail. Results always show the exact code, rating, and rule as written.</p>
+ <div class="toolbar">
+  <div class="search-box">
+   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+   <input type="text" id="explorerSearch" placeholder="Search by keyword, SOP code, or topic (e.g. 'porting', '1.9', 'maternity')" oninput="onExplorerSearch(this.value)">
+  </div>
+ </div>
+ <div class="chip-row" style="margin-bottom:8px;">
+  <span class="chip" data-f="rating" data-v="all">All ratings</span>
+  <span class="chip" data-f="rating" data-v="1">Rating 1</span>
+  <span class="chip" data-f="rating" data-v="2">Rating 2</span>
+  <span class="chip" data-f="rating" data-v="3">Rating 3</span>
+  <span class="chip" data-f="rating" data-v="4">Rating 4</span>
+  <span class="chip" data-f="rating" data-v="5">Rating 5</span>
+  <span class="chip" data-f="type" data-v="suggestion">Suggestions</span>
+  <span class="chip" data-f="type" data-v="persona">Persona</span>
+ </div>
+ <div class="result-count" id="explorerCount"></div>
+ <div id="explorerResults"></div>
+ `;
+}
+function wireExplorer(){
+ document.querySelectorAll('.chip[data-f]').forEach(chip=>{
+  chip.onclick = ()=>{
+   const f = chip.dataset.f, v = chip.dataset.v;
+   if(f==="rating"){
+    explorerState.rating = v;
+    if(v!=="all") explorerState.type="all";
+   } else if(f==="type"){
+    explorerState.type = (explorerState.type===v) ? "all" : v;
+    explorerState.rating="all";
+   }
+   syncExplorerChips();
+   drawExplorerResults();
+  };
+ });
+ syncExplorerChips();
+ const input = document.getElementById('explorerSearch');
+ if(input) input.value = explorerState.q;
+ drawExplorerResults();
+}
+function syncExplorerChips(){
+ document.querySelectorAll('.chip[data-f]').forEach(chip=>{
+  const f=chip.dataset.f, v=chip.dataset.v;
+  let active=false;
+  if(f==="rating") active = (explorerState.rating===v);
+  if(f==="type") active = (explorerState.type===v);
+  chip.classList.toggle("active", active);
+ });
+}
+function onExplorerSearch(v){
+ explorerState.q = v.toLowerCase();
+ drawExplorerResults();
+}
+function matchRule(rule, state){
+ if(state.rating!=="all"){
+  if(String(rule.rating)!==String(state.rating)) return false;
+ }
+ if(state.type!=="all"){
+  if(rule.type!==state.type) return false;
+ }
+ if(state.q){
+  const hay = [rule.code, rule.title, rule.rule, (rule.notes||[]).join(" "), (rule.annexure||[]).map(a=>a.text+" "+(a.notes||[]).join(" ")).join(" ")].join(" ").toLowerCase();
+  if(!hay.includes(state.q)) return false;
+ }
+ return true;
+}
+function drawExplorerResults(){
+ const results = RULES.filter(r=>matchRule(r, explorerState));
+ document.getElementById('explorerCount').textContent = results.length + " result" + (results.length===1?"":"s");
+ document.getElementById('explorerResults').innerHTML = results.length
+  ? results.map(r=>renderRuleCard(r)).join("")
+  : `<div class="card" style="padding:24px; text-align:center; color:var(--ink-faint); font-size:13.5px;">No SOP codes match that search.</div>`;
+}
+function goExplorerFiltered(kind, val){
+ explorerState = {q:"", rating: kind==="rating"?String(val):"all", type: kind==="type"?val:"all"};
+ navigate('explorer');
+}
+
+/* ---------------------------------------------------------------
+   3. LEARNING MODULES VIEW
+--------------------------------------------------------------- */
+function renderModules(){
+ const cards = MODULES.map((m,i)=>{
+  const rules = m.codes.map(findRule).filter(Boolean);
+  const ratingsInvolved = [...new Set(rules.map(r=>r.rating || (r.type==="suggestion"?"S":r.type==="persona"?"P":"?")))];
+  return `
+  <div class="card module-card">
+   <div class="module-header" onclick="toggleModule(${i})" id="mh_${i}">
+    <div>
+     <h3>${esc(m.title)}</h3>
+     <div class="m-sub">SOP ${esc(m.sub)} · ${rules.length} code${rules.length===1?"":"s"}</div>
+    </div>
+    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+   </div>
+   <div class="module-body" id="mb_${i}">
+    <div class="module-body-inner">
+     ${rules.map(r=>renderModuleTopic(r)).join("")}
+    </div>
+   </div>
+  </div>`;
+ }).join("");
+
+ return `
+ <div class="eyebrow">Section 3</div>
+ <h2>Learning Modules</h2>
+ <p class="intro">The SOP's codes, grouped into practical learning topics for onboarding. Grouping is for teaching only — every rule, rating, and exception below is unchanged from the SOP.</p>
+ ${cards}
+ `;
+}
+function renderModuleTopic(rule){
+ const examples = (rule.annexure||[]).filter(a => /\bEx(ample)?[:.]/.test((a.text||"")+" "+(a.notes||[]).join(" ")));
+ return `
+ <div class="topic-block">
+  <h4>${esc(rule.title)} <span class="badge ${ratingBadgeClass(rule)}">${ratingBadgeLabel(rule)}</span> <span class="badge badge-outline">${esc(rule.code)}</span></h4>
+  <div class="field-label">What the SOP requires</div>
+  <div class="sop-requires">${esc(rule.rule)}</div>
+  ${rule.notes && rule.notes.length ? `<div class="field-label">Important notes / exceptions</div>` + rule.notes.map(n=>`<div class="note-item">${esc(n)}</div>`).join("") : ""}
+  ${rule.annexure && rule.annexure.length ? `<div class="field-label">Annexure detail</div>` + rule.annexure.map(a=>`<div class="annex-item"><span class="letter">${a.letter}</span>${esc(a.text)}${(a.notes||[]).map(n=>`<div class="note-item">${esc(n)}</div>`).join("")}</div>`).join("") : ""}
+ </div>`;
+}
+function toggleModule(i){
+ const body = document.getElementById('mb_'+i);
+ const head = document.getElementById('mh_'+i);
+ const isOpen = head.classList.contains('open');
+ body.classList.toggle('open', !isOpen);
+ head.classList.toggle('open', !isOpen);
+ markVisited('modules');
+}
+
+/* ---------------------------------------------------------------
+   4. RATING BOUNDARIES VIEW
+--------------------------------------------------------------- */
+function renderBoundaries(){
+ const cards = BOUNDARIES.map(b=>`
+  <div class="card boundary-card">
+   <div class="boundary-title">${esc(b.title)}</div>
+   <div class="vs-row">
+    <div class="vs-col">
+     <span class="badge ${typeof b.left.rating==='number' ? 'badge-'+b.left.rating : 'badge-outline'}">${typeof b.left.rating==='number' ? 'Rating '+b.left.rating : esc(String(b.left.rating))}</span>
+     <p>${esc(b.left.text)}</p>
+    </div>
+    <div class="vs-mid">vs</div>
+    <div class="vs-col">
+     <span class="badge ${typeof b.right.rating==='number' ? 'badge-'+b.right.rating : 'badge-outline'}">${typeof b.right.rating==='number' ? 'Rating '+b.right.rating : esc(String(b.right.rating))}</span>
+     <p>${esc(b.right.text)}</p>
+    </div>
+   </div>
+   <div class="note-item" style="margin-top:12px;"><b>Why:</b> ${esc(b.why)}</div>
+   <div class="boundary-source">Source: ${esc(b.source)}</div>
+  </div>
+ `).join("");
+ return `
+ <div class="eyebrow">Section 4</div>
+ <h2>Rating Boundaries</h2>
+ <p class="intro">Similar-looking mistakes that the SOP itself rates differently. Each distinction below is drawn directly from the SOP's own wording — nothing here is inferred.</p>
+ ${cards}
+ `;
+}
+
+/* ---------------------------------------------------------------
+   5. COMMON MISTAKES (from internal feedback log) VIEW
+--------------------------------------------------------------- */
+function renderMistakes(){
+ const cards = MISTAKES.map(m=>`
+  <div class="card mistake-card">
+   <div class="mistake-head">
+    <div class="mistake-title">${esc(m.title)}</div>
+    <span class="mistake-count">${esc(m.count)}</span>
+   </div>
+   <div class="mistake-codes">${m.codes.map(c=>`<button class="code-pill" onclick="goExplorerSearch('${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join("")}</div>
+   <div class="mistake-cols">
+    <div>
+     <div class="mistake-col-head wrong">What went wrong</div>
+     <ul class="mistake-list">${m.wrong.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+    </div>
+    <div>
+     <div class="mistake-col-head ideal">Ideal approach (per SOP)</div>
+     <ul class="mistake-list">${m.ideal.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+    </div>
+   </div>
+  </div>
+ `).join("");
+ return `
+ <div class="eyebrow">Section 5</div>
+ <h2>Common Mistakes — From Real Feedback</h2>
+ <p class="intro">Patterns pulled from Common Mistakes advisors received on live chats and calls.</p>
+ <div class="stat-strip">
+  <div class="stat-box"><div class="stat-num">${FEEDBACK_STATS.total}</div><div class="stat-lbl">Chats/calls reviewed</div></div>
+  <div class="stat-box"><div class="stat-num">${FEEDBACK_STATS.flagged}</div><div class="stat-lbl">Carried a Red or Orange flag (${FEEDBACK_STATS.pct}%)</div></div>
+  <div class="stat-box"><div class="stat-num">${FEEDBACK_STATS.issues}</div><div class="stat-lbl">Individual issues logged</div></div>
+  <div class="stat-box"><div class="stat-num">${MISTAKES.length}</div><div class="stat-lbl">Recurring patterns below</div></div>
+ </div>
+ ${cards}
+ <p class="footer-note">Source: DH87 — Common Mistakes feedback log .</p>
+ `;
+}
+function goExplorerSearch(code){
+ explorerState = {q: code.toLowerCase(), rating:"all", type:"all"};
+ navigate('explorer');
+}
+
+/* ---------------------------------------------------------------
+   6. SCENARIO-BASED LEARNING VIEW
+--------------------------------------------------------------- */
+function renderScenarios(){
+ const cards = SCENARIOS.map((s,i)=>`
+  <div class="card scenario-card">
+   <div class="scenario-num">Scenario ${i+1}</div>
+   <div class="scenario-text">${esc(s.q)}</div>
+   <div class="scenario-q">${esc(s.ask)}</div>
+   <button class="reveal-btn" onclick="revealScenario(${i})">Show answer &amp; SOP code</button>
+   <div class="scenario-reveal" id="sr_${i}">
+    <div>${esc(s.answer)}</div>
+    <div style="margin-top:10px;"><span class="badge ${s.rating ? 'badge-'+s.rating : 'badge-outline'}">${s.rating ? 'Rated '+s.rating : 'See SOP'}</span> <span class="badge badge-outline">${esc(s.code)}</span></div>
+   </div>
+  </div>
+ `).join("");
+ return `
+ <div class="eyebrow">Section 6</div>
+ <h2>Scenario-Based Learning</h2>
+ <p class="intro">Every scenario below is drawn from a situation explicitly described in the SOP or its Annexure. Think through your answer.</p>
+ ${cards}
+ `;
+}
+function revealScenario(i){
+ const el = document.getElementById('sr_'+i);
+ el.classList.toggle('shown');
+ markVisited('scenarios');
+}
+
+/* ---------------------------------------------------------------
+   7. FINAL QUIZ VIEW  (supports going back + reviewing answers)
+--------------------------------------------------------------- */
+let quizState = {i:0, answers:new Array(QUIZ.length).fill(null), done:false, reviewMode:false};
+function quizScore(){
+ return quizState.answers.reduce((s,a,idx)=> s + (a!==null && a===QUIZ[idx].correct ? 1 : 0), 0);
+}
+function quizFrontier(){
+ const firstUnanswered = quizState.answers.findIndex(a=>a===null);
+ return firstUnanswered === -1 ? QUIZ.length-1 : firstUnanswered;
+}
+function renderQuiz(){
+ if(quizState.done && !quizState.reviewMode){
+  return renderQuizResult();
+ }
+ const total = QUIZ.length;
+ const q = QUIZ[quizState.i];
+ const already = quizState.answers[quizState.i] !== null;
+ const frontier = quizFrontier();
+
+ const optsHtml = q.options.map((opt,idx)=>{
+  let cls = "quiz-opt";
+  if(already){
+   cls += " disabled";
+   if(idx===q.correct) cls += " correct";
+   else if(idx===quizState.answers[quizState.i]) cls += " incorrect";
+  }
+  return `<button class="${cls}" ${already?'':`onclick="answerQuiz(${idx})"`}>${esc(opt)}</button>`;
+ }).join("");
+
+ const dots = QUIZ.map((qq,idx)=>{
+  const ans = quizState.answers[idx];
+  const locked = !quizState.reviewMode && idx > frontier;
+  let cls = "quiz-dot";
+  if(idx===quizState.i) cls += " current";
+  if(ans!==null) cls += (ans===qq.correct ? " correct" : " incorrect");
+  if(locked) cls += " locked";
+  return `<button class="${cls}" ${locked? 'disabled':`onclick="goToQuiz(${idx})"`}>${idx+1}</button>`;
+ }).join("");
+
+ let nextLabel, nextEnabled, nextFn;
+ if(quizState.reviewMode){
+  nextLabel = (quizState.i+1 < total) ? "Next question" : "Back to results";
+  nextEnabled = true;
+  nextFn = "nextQuiz()";
+ } else {
+  nextLabel = (quizState.i+1 < total) ? "Next question" : "See results";
+  nextEnabled = already;
+  nextFn = "nextQuiz()";
+ }
+
+ return `
+ <div class="eyebrow">Section 7</div>
+ <h2>Final Quiz</h2>
+ <p class="intro">${total} questions covering major SOP areas and common mistakes.</p>
+ ${quizState.reviewMode ? `<div class="review-banner"><span>Reviewing your answers</span><button class="btn secondary" style="padding:5px 12px; font-size:11.5px;" onclick="backToResults()">Exit review</button></div>` : ""}
+ <div class="quiz-shell">
+  <div class="quiz-progress"><span>Question ${quizState.i+1} of ${total}</span><span>Score so far: ${quizScore()}</span></div>
+  <div class="quiz-dots">${dots}</div>
+  <div class="card quiz-card">
+   <div class="quiz-q">${esc(q.q)}</div>
+   <div id="quizOpts">${optsHtml}</div>
+   <div class="quiz-explain ${already?'shown':''}" id="quizExplain">${esc(q.explain)}</div>
+   <div class="quiz-nav">
+    <button class="btn secondary" onclick="prevQuiz()" ${quizState.i===0?'disabled':''}>Previous</button>
+    <button class="btn" id="quizNextBtn" onclick="${nextFn}" ${nextEnabled?'':'disabled'}>${nextLabel}</button>
+   </div>
+  </div>
+ </div>
+ `;
+}
+function answerQuiz(idx){
+ if(quizState.answers[quizState.i] !== null) return;
+ quizState.answers[quizState.i] = idx;
+ renderView('quiz');
+}
+function goToQuiz(idx){
+ const frontier = quizFrontier();
+ if(!quizState.reviewMode && idx > frontier) return;
+ quizState.i = idx;
+ renderView('quiz');
+}
+function prevQuiz(){
+ if(quizState.i > 0){
+  quizState.i--;
+  renderView('quiz');
+ }
+}
+function nextQuiz(){
+ if(quizState.reviewMode){
+  if(quizState.i+1 < QUIZ.length){
+   quizState.i++;
+  } else {
+   quizState.reviewMode = false;
+  }
+  renderView('quiz');
+  return;
+ }
+ if(quizState.answers[quizState.i] === null) return;
+ if(quizState.i+1 >= QUIZ.length){
+  quizState.done = true;
+ } else {
+  quizState.i++;
+ }
+ renderView('quiz');
+}
+function startReview(){
+ quizState.reviewMode = true;
+ quizState.i = 0;
+ renderView('quiz');
+}
+function backToResults(){
+ quizState.reviewMode = false;
+ renderView('quiz');
+}
+function renderQuizResult(){
+ const total = QUIZ.length;
+ const score = quizScore();
+ const pct = Math.round((score/total)*100);
+ let msg = "Take another pass through the SOP Explorer for the codes you missed.";
+ if(pct>=90) msg = "Strong grasp of the SOP — ready to apply this to live chats/calls.";
+ else if(pct>=70) msg = "Good foundation — revisit the Rating Boundaries section for the finer distinctions.";
+ return `
+ <div class="eyebrow">Section 7</div>
+ <h2>Final Quiz</h2>
+ <div class="quiz-shell">
+  <div class="card quiz-result">
+   <div class="score-lbl">Your score</div>
+   <div class="score">${score} / ${total}</div>
+   <p style="color:var(--ink-soft); font-size:13.5px; max-width:420px; margin:0 auto 20px;">${pct}% correct. ${msg}</p>
+   <div class="result-actions">
+    <button class="btn secondary" onclick="startReview()">Review answers</button>
+    <button class="btn" onclick="restartQuiz()">Retake quiz</button>
+   </div>
+  </div>
+ </div>
+ `;
+}
+function restartQuiz(){
+ quizState = {i:0, answers:new Array(QUIZ.length).fill(null), done:false, reviewMode:false};
+ renderView('quiz');
+}
+
+/* ---------------------------------------------------------------
+   8. QUICK REFERENCE VIEW
+--------------------------------------------------------------- */
+function renderReference(){
+ const rows = RULES.map(r=>`
+  <tr>
+   <td class="code-cell">${esc(r.code)}</td>
+   <td><span class="badge ${ratingBadgeClass(r)}">${ratingBadgeLabel(r)}</span></td>
+   <td>${esc(r.title)}</td>
+   <td>${esc(r.rule)}</td>
+  </tr>
+ `).join("");
+ return `
+ <div class="eyebrow">Section 8</div>
+ <h2>Quick Reference</h2>
+ <p class="intro">A sneak peak into the main categories.</p>
+ <div class="toolbar">
+  <div class="search-box">
+   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+   <input type="text" id="refSearch" placeholder="Filter the table..." oninput="filterReference(this.value)">
+  </div>
+ </div>
+ <div class="ref-scroll">
+  <table class="ref-table" id="refTable">
+   <thead><tr><th>Code</th><th>Rating</th><th>Category</th><th>Rule</th></tr></thead>
+   <tbody id="refBody">${rows}</tbody>
+  </table>
+ </div>
+ `;
+}
+function filterReference(v){
+ v = v.toLowerCase();
+ document.querySelectorAll('#refBody tr').forEach(tr=>{
+  tr.style.display = tr.textContent.toLowerCase().includes(v) ? "" : "none";
+ });
+}
+
+/* ---------------------------------------------------------------
+   NAV / APP SHELL
+--------------------------------------------------------------- */
+const PAGES = [
+ {id:"framework", label:"Rating Framework", render:renderFramework},
+ {id:"explorer", label:"SOP Explorer", render:renderExplorer, after:wireExplorer},
+ {id:"modules", label:"Learning Modules", render:renderModules},
+ {id:"boundaries", label:"Rating Boundaries", render:renderBoundaries},
+ {id:"mistakes", label:"Common Mistakes", render:renderMistakes},
+ {id:"scenarios", label:"Scenario-Based Learning", render:renderScenarios},
+ {id:"quiz", label:"Final Quiz", render:renderQuiz},
+ {id:"reference", label:"Quick Reference", render:renderReference}
+];
+let visited = new Set();
+let currentPage = "framework";
+
+function buildNav(){
+ const nav = document.getElementById('navList');
+ nav.innerHTML = PAGES.map((p,i)=>`
+  <button class="navlink" id="nav_${p.id}" onclick="navigate('${p.id}')">
+   <span class="num">${i+1}</span>${esc(p.label)}
+  </button>
+ `).join("");
+}
+function navigate(id){
+ currentPage = id;
+ renderView(id);
+ markVisited(id);
+ document.querySelectorAll('.navlink').forEach(b=>b.classList.remove('active'));
+ const btn = document.getElementById('nav_'+id);
+ if(btn) btn.classList.add('active');
+ if(window.scrollTo) window.scrollTo(0,0);
+ const sidebar = document.getElementById('sidebar');
+ if(window.innerWidth <= 900) sidebar.classList.remove('open');
+}
+function renderView(id){
+ const page = PAGES.find(p=>p.id===id);
+ if(!page) return;
+ document.getElementById('viewRoot').innerHTML = `<div class="view active">${page.render()}</div>`;
+ if(page.after) page.after();
+}
+function markVisited(id){
+ visited.add(id);
+ const pct = Math.round((visited.size / PAGES.length) * 100);
+ document.getElementById('progressPct').textContent = pct + "%";
+ document.getElementById('progressFill').style.width = pct + "%";
+}
+
+document.getElementById('menuToggle').addEventListener('click', ()=>{
+ document.getElementById('sidebar').classList.toggle('open');
+});
+
+buildNav();
+navigate('framework');
+
+</script>
+</body>
+</html>
